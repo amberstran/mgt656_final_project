@@ -1,16 +1,19 @@
 ---
 name: User Story
-about: Capture a user-facing requirement
+about: Capture a user-facing requirement for Agora Forum
 labels: user story
 ---
 
 ### Title
-As a [user], I want [feature] so that [benefit].
+As a [user], I want [feature], so that [benefit].
+
+### Description
+Provide a short description of the user need or feature.
 
 ### Acceptance Criteria
-- [ ] Criterion 1
-- [ ] Criterion 2
-- [ ] Criterion 3
+- [ ] Given [context], when [action], then [expected result]
+- [ ] Given [context], when [action], then [expected result]
+- [ ] Given [context], when [action], then [expected result]
 
 ### Story Points
 - 1 / 2 / 3 / 5 / 8 / 13 / ?
