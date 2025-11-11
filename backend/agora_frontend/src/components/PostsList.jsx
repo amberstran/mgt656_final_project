@@ -30,14 +30,18 @@ const PostsList = ({ feedType = 'all' }) => {
     };
   }, [feedType]);
 
-  if (loading) return <div>Loading posts…</div>;
-  if (error) return <div className="text-red-600">Error: {JSON.stringify(error)}</div>;
-  if (!posts.length) return <div>No posts to show.</div>;
+  if (loading) return <div className="text-center py-8 text-gray-600">Loading posts…</div>;
+  if (error) return <div className="text-center py-8 text-red-600">Error: {JSON.stringify(error)}</div>;
+  if (!posts.length) return <div className="text-center py-8 text-gray-600">No posts to show.</div>;
+
+  const handleDelete = (postId) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  };
 
   return (
-    <div>
+    <div className="max-w-3xl mx-auto pl-12 pr-6">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post.id} post={post} onDelete={handleDelete} />
       ))}
     </div>
   );

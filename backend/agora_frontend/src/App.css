@@ -36,3 +36,48 @@
     transform: rotate(360deg);
   }
 }
+
+.agora-header {
+  background-color: #2563eb; /* blue-600 */
+  width: 100%;
+  padding: 2rem 0;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.agora-header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 2rem;
+}
+
+.yale-logo {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.yale-logo-text {
+  font-family: 'Times New Roman', serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: white;
+  letter-spacing: 0.1em;
+  padding: 0.5rem 1rem;
+  border-right: 2px solid white;
+  margin-right: 1rem;
+}
+
+.agora-header h1 {
+  color: white !important;
+  text-align: center;
+  margin: 0;
+}

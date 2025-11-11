@@ -29,10 +29,12 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-DEBUG = os.getenv("DEBUG") == "True"
+SECRET_KEY = os.getenv("SECRET_KEY") or 'django-insecure-dev-placeholder'
+# Default DEBUG to True for local development when environment var is not set.
+DEBUG = os.getenv("DEBUG", "True") == "True"
 
-ALLOWED_HOSTS = []
+# Allow localhost by default for local development. Can be overridden via env var.
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
 
 
 # Application definition
@@ -45,9 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'core.apps.CoreConfig',
+    'rest_framework',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -134,3 +139,9 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "core.CustomUser"
+
+# CORS settings for local development
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000',
+]
