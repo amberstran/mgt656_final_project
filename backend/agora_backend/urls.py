@@ -16,8 +16,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from core.views import PostViewSet
+from .auth_views import login_view, get_csrf_token
+
+router = DefaultRouter()
+router.register(r'posts', PostViewSet, basename='post')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/', include('core.urls')),
+    path('api/auth/csrf/', get_csrf_token, name='csrf-token'),
+    path('api/auth/login/', login_view, name='login'),
+    path('api/', include(router.urls)),
 ]

@@ -85,17 +85,59 @@ const PostsList = ({ feedType = 'new', pageSize = 10 }) => {
     isFetchingRef.current = false;
   }, [feedType]);
 
+  const handleDelete = (postId) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  };
+
   const openPost = (post) => setSelectedPost(post);
   const closePost = () => setSelectedPost(null);
 
+  if (loading && posts.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="border border-gray-200 rounded-lg p-6 bg-white shadow-md animate-pulse">
+              <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-full mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  
+  if (error && posts.length === 0) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-8">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <div className="text-red-600 font-semibold mb-2">⚠️ Error loading posts</div>
+          <div className="text-red-500 text-sm">{typeof error === 'string' ? error : 'Failed to load posts. Please refresh the page.'}</div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!loading && !error && !posts.length) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-12 text-center">
+        <div className="text-6xl mb-4">📭</div>
+        <div className="text-gray-600 text-lg font-medium">No posts to show</div>
+        <div className="text-gray-500 text-sm mt-2">Be the first to create a post!</div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="max-w-3xl mx-auto px-4 py-6">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onClick={openPost} />
+        <PostCard key={post.id} post={post} onDelete={handleDelete} />
       ))}
 
-      {loading && <div>Loading…</div>}
-      {error && <div className="text-red-600">Error: {JSON.stringify(error)}</div>}
+      {loading && posts.length > 0 && <div className="text-center py-4 text-gray-500">Loading more posts…</div>}
+      {error && posts.length > 0 && <div className="text-red-600 text-center py-4">Error: {typeof error === 'string' ? error : 'Failed to load more posts'}</div>}
 
       {/* sentinel */}
       <div ref={observerRef} style={{ height: 1 }} />

@@ -42,9 +42,10 @@ class Comment(models.Model):
     content = models.TextField()
     is_anonymous = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
 
     def __str__(self):
-        return f"Comment by {'Anonymous' if self.is_anonymous else self.user}"
+        return f"Comment by {'Anonymous' if self.is_anonymous else self.user}" 
 
 
 class Like(models.Model):
