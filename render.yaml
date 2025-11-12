@@ -4,7 +4,7 @@ services:
     name: agora-backend
     env: python
     buildCommand: pip install -r requirements.txt && cd backend && python manage.py collectstatic --noinput
-    startCommand: cd backend && gunicorn agora_backend.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: cd backend && PYTHONPATH=/opt/render/project/src:$PYTHONPATH gunicorn agora_backend.wsgi:application --bind 0.0.0.0:$PORT
     # This will be deployed as a separate web service that runs continuously
     envVars:
       - key: PYTHON_VERSION
