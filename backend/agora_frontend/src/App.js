@@ -6,6 +6,7 @@ import axios from 'axios';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
+  const [feedType, setFeedType] = useState('new');
 
   // Fetch CSRF token on app load
   useEffect(() => {
@@ -24,16 +25,30 @@ function App() {
         <div className="agora-header-content">
           <div className="yale-logo-text">YALE</div>
           <h1 className="text-4xl font-bold text-white text-center drop-shadow">Agora</h1>
-          <button
-            onClick={() => setShowLogin(!showLogin)}
-            className="ml-4 px-5 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow transform hover:scale-105 active:scale-95"
-          >
-            {showLogin ? '✕ Close' : '🔑 Login'}
-          </button>
+          <div className="flex items-center gap-4">
+            <div>
+              <label className="mr-2 text-white text-sm">Sort:</label>
+              <select 
+                value={feedType} 
+                onChange={(e) => setFeedType(e.target.value)} 
+                className="border rounded p-1 text-sm"
+              >
+                <option value="new">New</option>
+                <option value="all">All</option>
+                <option value="top">Top</option>
+              </select>
+            </div>
+            <button
+              onClick={() => setShowLogin(!showLogin)}
+              className="ml-4 px-5 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow transform hover:scale-105 active:scale-95"
+            >
+              {showLogin ? '✕ Close' : '🔑 Login'}
+            </button>
+          </div>
         </div>
       </div>
       {showLogin && <Login onLogin={() => setShowLogin(false)} />}
-      <PostsList />
+      <PostsList feedType={feedType} />
     </div>
   );
 }

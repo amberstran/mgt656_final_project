@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
     'core.apps.CoreConfig',
     'rest_framework',
     'corsheaders',
@@ -61,6 +63,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+# --- CORS settings update ---
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'http://10.0.0.111:3000',
+]
+# --- End CORS settings update ---
 
 ROOT_URLCONF = 'agora_backend.urls'
 
