@@ -10,7 +10,8 @@ function App() {
 
   // Fetch CSRF token on app load
   useEffect(() => {
-    axios.get('http://localhost:8000/api/auth/csrf/', { withCredentials: true })
+    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+    axios.get(`${apiUrl}/api/auth/csrf/`, { withCredentials: true })
       .then(() => {
         // CSRF cookie is now set
       })
