@@ -1,30 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import PostsList from './components/PostsList';
+import Login from './components/Login';
+import axios from 'axios';
 
 function App() {
-  const [logoError, setLogoError] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+
+  // Fetch CSRF token on app load
+  useEffect(() => {
+    axios.get('http://localhost:8000/api/auth/csrf/', { withCredentials: true })
+      .then(() => {
+        // CSRF cookie is now set
+      })
+      .catch(err => {
+        console.error('Failed to get CSRF token:', err);
+      });
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="agora-header">
         <div className="agora-header-content">
-          {!logoError ? (
-            <img 
-              src="https://www.yale.edu/sites/default/files/yale_wordmark_white_1.png" 
-              alt="Yale University" 
-              className="yale-logo"
-              onError={() => setLogoError(true)}
-            />
-          ) : (
-            <div className="yale-logo-text">YALE</div>
-          )}
-          <h1 className="text-4xl font-bold text-white text-center drop-shadow-lg">Agora</h1>
+          <div className="yale-logo-text">YALE</div>
+          <h1 className="text-4xl font-bold text-white text-center drop-shadow">Agora</h1>
+          <button
+            onClick={() => setShowLogin(!showLogin)}
+            className="ml-4 px-5 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow transform hover:scale-105 active:scale-95"
+          >
+            {showLogin ? '✕ Close' : '🔑 Login'}
+          </button>
         </div>
       </div>
-      <div className="container mx-auto pl-12 pr-6 pb-8">
-        <PostsList />
-      </div>
+      {showLogin && <Login onLogin={() => setShowLogin(false)} />}
+      <PostsList />
     </div>
   );
 }
