@@ -24,8 +24,9 @@ services:
         sync: false
 
   # Frontend React App (Static Site)
-  - type: static
+  - type: web
     name: agora-frontend
+    env: static
     buildCommand: cd backend/agora_frontend && npm install && npm run build
     staticPublishPath: backend/agora_frontend/build
     envVars:
