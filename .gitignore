@@ -1,0 +1,27 @@
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+
+# Django local settings
+backend/agora_backend/settings_local.py
+
+# --- Node / Frontend ---
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+
+# --- VSCode / System ---
+.vscode/
+.DS_Store
+.idea/
