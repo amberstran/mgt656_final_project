@@ -16,8 +16,10 @@ function getCookie(name) {
   return cookieValue;
 }
 
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
+
 const API = axios.create({
-  baseURL: 'http://localhost:8000/api/',  // Django DRF backend
+  baseURL: API_BASE_URL,  // Django DRF backend
   withCredentials: true,                  // if using session auth
 });
 
