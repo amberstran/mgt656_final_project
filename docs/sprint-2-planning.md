@@ -1,11 +1,11 @@
-Sprint 2 Planning
+## Sprint 2 Planning
 
-Sprint Name: Sprint 2
-Start Date: 2025-11-06
-End Date: 2025-11-12
-Duration: 7 days
+Sprint Name: Sprint 2 <br>
+Start Date: 2025-11-06 <br>
+End Date: 2025-11-12  <br>
+Duration: 7 days <br>
 
-Sprint Goal:
+### Sprint Goal:
 
 Deliver a functional Forum MVP on staging with essential browsing, posting, interaction, and basic verification capabilities.
 The sprint focuses on enabling users to:
@@ -20,7 +20,7 @@ The sprint focuses on enabling users to:
 
 5) Upload images in posts
 
-Planned User Stories for Sprint 2: 
+### Planned User Stories for Sprint 2: 
 
 | Issue # | Title                                                  | Story Points | Priority |
 | ------- | ------------------------------------------------------ | ------------ | -------- |
@@ -38,7 +38,7 @@ Planned User Stories for Sprint 2:
 Total Committed Story Points
 47 story points planned for Sprint 2.
 
-Team Capacity & Assignments
+### Team Capacity & Assignments
 
 | Team Member       | Capacity | Assigned Stories                                                         |
 | ----------------- | -------- | ------------------------------------------------------------------------ |
@@ -47,7 +47,7 @@ Team Capacity & Assignments
 | **AmeeshaMasand** | Full     | #15 Reply, #16 Comment, #19 Delete, #20 Like                             |
 
 
-Dependencies Identified
+### Dependencies Identified
 
 | User Story               | Dependency                        | Notes                                        |
 | ------------------------ | --------------------------------- | -------------------------------------------- |
@@ -56,7 +56,7 @@ Dependencies Identified
 | #10 Search (future)      | Needs populated posts             | Not in this sprint but relevant later        |
 | ❌ #13 NetID Verification | **No external CAS dependency**    | Simple email domain validation for @yale.edu |
 
-Risks & Mitigation Strategies
+### Risks & Mitigation Strategies
 | Risk                                         | Impact | Mitigation                        |
 | -------------------------------------------- | ------ | --------------------------------- |
 | Incorrect email validation logic             | Low    | Use regex + domain check          |
