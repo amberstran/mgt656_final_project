@@ -48,10 +48,24 @@ export const loginUser = (credentials) => API.post('auth/login/', credentials);
 export const fetchPosts = (type, page = 1, page_size = 10) =>
   API.get(`posts/?feed=${type}&page=${page}&page_size=${page_size}`);
 export const createPost = (postData) => API.post('posts/', postData);
-export const fetchCircles = () => API.get('circles/');
+// Note: These endpoints are not yet implemented in the backend
+// They return 404 but won't cause 400 errors
+export const fetchCircles = () => API.get('circles/').catch(err => {
+  console.warn('Circles endpoint not implemented:', err);
+  return { data: [] };
+});
 export const deletePost = (postId) => API.delete(`posts/${postId}/`);
-export const joinCircle = (circleId) => API.post(`circles/${circleId}/join/`);
-export const leaveCircle = (circleId) => API.post(`circles/${circleId}/leave/`);
-export const fetchProfile = (userId) => API.get(`users/${userId}/`);
+export const joinCircle = (circleId) => API.post(`circles/${circleId}/join/`).catch(err => {
+  console.warn('Join circle endpoint not implemented:', err);
+  throw err;
+});
+export const leaveCircle = (circleId) => API.post(`circles/${circleId}/leave/`).catch(err => {
+  console.warn('Leave circle endpoint not implemented:', err);
+  throw err;
+});
+export const fetchProfile = (userId) => API.get(`users/${userId}/`).catch(err => {
+  console.warn('User profile endpoint not implemented:', err);
+  throw err;
+});
 export const toggleLike = (postId) => API.post(`posts/${postId}/like/`);
 export const addComment = (postId, data) => API.post(`posts/${postId}/comment/`, data);
