@@ -57,8 +57,8 @@ Action: Identify backend-related tasks in Sprint Planning and complete setup on 
 
 | Action Item                                              | Assignee      | Due Date                 |
 | -------------------------------------------------------- | ------------- | ------------------------ |
-| Configure SMTP + token-based email verification (#13)    | toxiclee      | 2025-11-15               |
-| Set up static/media configuration for image upload (#17) | toxiclee      | 2025-11-15               |
+| Configure SMTP + token-based email verification (#13)    | Yiru Li       | 2025-11-15               |
+| Set up static/media configuration for image upload (#17) | Yiru Li       | 2025-11-15               |
 | Break down large user stories and create subtasks        | Full team     | Before Sprint 3 Planning |
 | Add a UI alignment session at the start of Sprint 3      | AmeeshaMasand | Start of Sprint 3        |
 
