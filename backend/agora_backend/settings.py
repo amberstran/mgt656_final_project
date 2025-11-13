@@ -145,13 +145,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = "core.CustomUser"
 
 # CORS settings - support both local and production
-CORS_ALLOWED_ORIGINS = os.getenv(
-    "CORS_ALLOWED_ORIGINS",
-    "http://localhost:3000,http://10.0.0.111:3000"
-).split(",")
+# Strip whitespace and filter out empty strings
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://10.0.0.111:3000")
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
 
 # CSRF settings - support both local and production
-CSRF_TRUSTED_ORIGINS = os.getenv(
-    "CSRF_TRUSTED_ORIGINS",
-    "http://localhost:3000,http://10.0.0.111:3000"
-).split(",")
+csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://10.0.0.111:3000")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
+
+# Allow all origins in development if DEBUG is True (for testing)
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+    CSRF_TRUSTED_ORIGINS = ['*']
