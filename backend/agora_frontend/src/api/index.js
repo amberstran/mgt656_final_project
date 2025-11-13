@@ -16,11 +16,17 @@ function getCookie(name) {
   return cookieValue;
 }
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api/';
+// Get API URL from environment, ensure it ends with /api/
+let apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+// Remove trailing slash if present, then add /api/
+apiBaseUrl = apiBaseUrl.replace(/\/$/, '') + '/api/';
 
 const API = axios.create({
-  baseURL: API_BASE_URL,  // Django DRF backend
+  baseURL: apiBaseUrl,  // Django DRF backend
   withCredentials: true,                  // if using session auth
+  headers: {
+    'Content-Type': 'application/json',
+  },
 });
 
 // Add CSRF token to all POST, PUT, DELETE requests

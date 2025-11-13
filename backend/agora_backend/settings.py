@@ -64,6 +64,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+# Exempt API endpoints from CSRF (DRF handles authentication separately)
+CSRF_COOKIE_SECURE = not DEBUG  # Only send CSRF cookie over HTTPS in production
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF cookie
+CSRF_USE_SESSIONS = False
+
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
 

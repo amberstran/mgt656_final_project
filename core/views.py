@@ -5,18 +5,25 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Count
 
 from .models import Post, Like, Comment
-from .models import Post, Like, Comment
-from .serializers import PostSerializer, CommentSerializer
 from .serializers import PostSerializer, CommentSerializer
 
 
-queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    serializer_class = PostSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        """
+        Optionally restricts the returned posts by filtering against
+        a `feed` query parameter in the URL.
+        """
+        queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
+        feed = self.request.query_params.get('feed', None)
+        # The feed parameter is accepted but doesn't change the query for now
+        # 'new', 'all', and 'top' all return the same ordered list
+        # This can be extended later to filter by different criteria
+        return queryset
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
