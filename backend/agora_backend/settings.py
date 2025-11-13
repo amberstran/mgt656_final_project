@@ -156,4 +156,3 @@ CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if 
 # Allow all origins in development if DEBUG is True (for testing)
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
-    CSRF_TRUSTED_ORIGINS = ['*']
