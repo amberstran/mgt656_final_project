@@ -1,13 +1,13 @@
-Sprint 2 Review
+## Sprint 2 Review
 
-Sprint Name: Sprint 2
+### Sprint Name: Sprint 2
 Dates: 2025-11-06 → 2025-11-12
 
-1. Sprint Goal
+### 1. Sprint Goal
 
 Deliver a functional Forum MVP on staging with essential browsing, posting, interaction, profile, and basic @yale.edu email verification capabilities.
 
-2. Completed User Stories (with demo notes)
+### 2. Completed User Stories (Demo Notes)
 
 All user stories below were completed and demoed successfully.
 | Issue # | Title                | Demo Notes                                                                |
@@ -20,17 +20,16 @@ All user stories below were completed and demoed successfully.
 | #19     | **Delete Own Post**  | Users can delete their own post; feed refreshes automatically.            |
 | #20     | **Like Post**        | Likes update immediately; counters increase without refresh.              |
 
-🖼 Screenshots
-![ui](https://github.com/user-attachments/assets/ad807eb5-f4e0-43f4-8179-922437a07826)
-
-3. Incomplete User Stories
+### 3. INCOMPLETE USER STORIES
+  
 | Issue # | Title                                          | Reason Not Completed                                           | Disposition            |
 | ------- | ---------------------------------------------- | -------------------------------------------------------------- | ---------------------- |
 | #13     | **NetID Verification (@yale.edu email check)** | Change in implementation approach; validation logic postponed. | Carry over to Sprint 3 |
 | #17     | **Upload Image in Post**                       | Required backend static/media setup; time was insufficient.    | Carry over to Sprint 3 |
 
 
-4. Sprint Metrics
+### 4. Sprint Metrics
+
 | Metric                     | Value             |
 | -------------------------- | ----------------- |
 | **Planned Story Points**   | 47                |
@@ -38,19 +37,19 @@ All user stories below were completed and demoed successfully.
 | **Velocity**               | **34 SP**         |
 | **Completion Rate**        | **34 / 47 = 72%** |
 
-5. Lessons Learned
+### 5. Lessons Learned
 
-—— Some infrastructure-heavy tasks (like image upload) need earlier technical setup and testing.
+Some infrastructure-heavy tasks (like image upload) need earlier technical setup and testing.
 
-—— Breaking down user stories could help reduce uncertainty (e.g., split image upload into backend config + UI integration).
+Breaking down user stories could help reduce uncertainty (e.g., split image upload into backend config + UI integration).
 
-—— UI alignment meetings early in the sprint help reduce rework.
+UI alignment meetings early in the sprint help reduce rework.
 
-—— Daily standups successfully helped unblock progress quickly.
+Daily standups successfully helped unblock progress quickly.
 
-—— Clearer acceptance criteria for verification logic could avoid mid-sprint ambiguity.
+Clearer acceptance criteria for verification logic could avoid mid-sprint ambiguity.
 
-6. Product Backlog Updates
+### 6. Product Backlog Updates
 
 * Carried over #13 and #17 to Sprint 3.
 
