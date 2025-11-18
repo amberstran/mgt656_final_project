@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Register | Agora</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      padding: 20px;
+    }
+    .card { 
+      max-width: 480px; 
+      width: 100%;
+      background: #fff; 
+      padding: 40px; 
+      border-radius: 16px; 
+      box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
+    }
+    h2 { 
+      margin-top: 0; 
+      color: #222; 
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+    p { 
+      color: #666; 
+      line-height: 1.5; 
+      margin-bottom: 24px;
+    }
+    label { 
+      display: block; 
+      margin-top: 16px; 
+      font-weight: 600; 
+      color: #222; 
+      font-size: 14px;
+    }
+    input, select { 
+      width: 100%; 
+      padding: 12px; 
+      margin-top: 6px; 
+      border-radius: 8px; 
+      border: 1px solid #ddd; 
+      font-size: 15px; 
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+    input:focus, select:focus { 
+      outline: none; 
+      border-color: #007aff; 
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1); 
+    }
+    button { 
+      margin-top: 24px; 
+      width: 100%;
+      padding: 14px; 
+      border-radius: 8px; 
+      border: none; 
+      background: #007aff; 
+      color: white; 
+      font-weight: 600; 
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.2s;
+    }
+    button:hover { 
+      background: #0051d5; 
+    }
+    .hint { 
+      margin-top: 6px; 
+      font-size: 13px; 
+      color: #999; 
+    }
+    .error { 
+      color: #d32f2f; 
+      background: #ffebee; 
+      padding: 12px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      border-left: 4px solid #d32f2f;
+    }
+    .error ul { 
+      margin: 0; 
+      padding-left: 20px; 
+    }
+    .success { 
+      color: #2e7d32; 
+      background: #e8f5e9; 
+      padding: 12px; 
+      border-radius: 8px; 
+      margin-bottom: 20px; 
+      border-left: 4px solid #2e7d32;
+    }
+    a { 
+      color: #007aff; 
+      text-decoration: none; 
+    }
+    a:hover { 
+      text-decoration: underline; 
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Join Agora</h2>
+
+    {% if errors %}
+      <div class="error">
+        <ul>
+          {% for e in errors %}
+            <li>{{ e }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if success %}
+      <div class="success">{{ success }}</div>
+      <p style="margin-top: 16px; text-align: center;">
+        <a href="/">Return to home</a>
+      </p>
+    {% else %}
+      <p>Register with your Yale email. You'll receive a verification email to set your password.</p>
+      
+      <form method="post">
+        {% csrf_token %}
+        
+        <label for="id_username">Username</label>
+        <input 
+          id="id_username" 
+          name="username" 
+          placeholder="Choose a username" 
+          value="{{ username|default:'' }}" 
+          required 
+          autocomplete="username"
+        />
+
+        <label for="id_email">Yale Email</label>
+        <input 
+          id="id_email" 
+          name="email" 
+          type="email" 
+          placeholder="you@yale.edu" 
+          value="{{ email|default:'' }}" 
+          required 
+          autocomplete="email"
+        />
+        <div class="hint">Must be a @yale.edu email address</div>
+
+        <label for="id_program">Major / Program</label>
+        <input 
+          id="id_program" 
+          name="program" 
+          placeholder="e.g., Computer Science" 
+          value="{{ program|default:'' }}" 
+          required 
+        />
+
+        <label for="id_grade">Grade / Year</label>
+        <select id="id_grade" name="grade" required>
+          <option value="">Select your year</option>
+          <option value="First Year Master" {% if grade == "First Year Master" %}selected{% endif %}>First Year Master</option>
+          <option value="Second Year Master" {% if grade == "Second Year Master" %}selected{% endif %}>Second Year Master</option>
+          <option value="PhD" {% if grade == "PhD" %}selected{% endif %}>PhD</option>
+        </select>
+
+        <button type="submit">Create Account</button>
+      </form>
+
+      <p style="margin-top: 20px; text-align: center; font-size: 14px;">
+        Already have an account? <a href="/accounts/login/">Sign in</a>
+      </p>
+    {% endif %}
+
+  </div>
+</body>
+</html>

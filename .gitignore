@@ -25,3 +25,6 @@ frontend/build/
 .vscode/
 .DS_Store
 .idea/
+
+# --- Secrets ---
+.env

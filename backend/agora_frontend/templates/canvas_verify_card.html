@@ -1,0 +1,28 @@
+{% load static %}
+{% if user.is_authenticated %}
+  <!-- ✅ 已通过 NetID 验证 -->
+  <div class="rounded-2xl border p-4 mb-4 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+      <span class="font-semibold">Verified with Yale NetID</span>
+      <span class="text-gray-500">@{{ user.username }}</span>
+    </div>
+    <a href="{% url 'cas_ng_logout' %}" class="px-3 py-1 rounded-2xl border">
+      Logout
+    </a>
+  </div>
+{% else %}
+  <!-- 🔒 未验证状态（旧版 UI 样式） -->
+  <div class="rounded-2xl border p-4 mb-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h3 class="font-semibold">NetID Verification</h3>
+        <p class="text-sm text-gray-500">Verify your Yale NetID to post, like, and comment.</p>
+      </div>
+      <a href="{% url 'cas_ng_login' %}?next={{ request.path }}"
+         class="px-4 py-2 rounded-2xl bg-blue-600 text-white">
+        Verify with Yale NetID
+      </a>
+    </div>
+  </div>
+{% endif %}

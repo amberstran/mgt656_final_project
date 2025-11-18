@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification Result - Agora</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-size: 40px;
+        }
+
+        .icon.success {
+            background: #d4edda;
+            color: #28a745;
+        }
+
+        .icon.error {
+            background: #f8d7da;
+            color: #dc3545;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .email {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 14px;
+            color: #333;
+            margin: 20px 0;
+            word-break: break-all;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 32px;
+            background: #007aff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .button:hover {
+            background: #0051d5;
+        }
+
+        .button.secondary {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+
+        .button.secondary:hover {
+            background: #5a6268;
+        }
+
+        .error-details {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .error-details p {
+            margin: 5px 0;
+            color: #856404;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        {% if success %}
+            <div class="icon success">✓</div>
+            <h1>Email Verified!</h1>
+            <p class="message">
+                Your email has been successfully verified. Your Agora account is now active.
+            </p>
+            {% if email %}
+                <div class="email">{{ email }}</div>
+            {% endif %}
+            <p class="message">
+                You can now start exploring Agora and connecting with your Yale community!
+            </p>
+            <div class="button-group">
+                <a href="{% url 'profile' %}" class="button">Go to Profile</a>
+                <a href="/" class="button secondary">Go to Home</a>
+            </div>
+        {% else %}
+            <div class="icon error">✗</div>
+            <h1>Verification Failed</h1>
+            <div class="error-details">
+                <p><strong>Issue:</strong> {{ error }}</p>
+                {% if error|stringformat:"s" == "Invalid or expired verification link" %}
+                    <p style="margin-top: 10px;">
+                        The verification link has expired or is invalid. Please request a new verification email.
+                    </p>
+                {% endif %}
+            </div>
+            <p class="message">
+                If you continue to experience issues, please contact support or try registering again.
+            </p>
+            <div class="button-group">
+                <a href="{% url 'email_verification' %}" class="button">Request New Link</a>
+                <a href="/" class="button secondary">Go to Home</a>
+            </div>
+        {% endif %}
+
+        <div class="footer">
+            <p>Agora Yale - Empowering Community Discussions</p>
+        </div>
+    </div>
+</body>
+</html>
