@@ -10,6 +10,8 @@ class CustomUser(AbstractUser):
     avatar = models.URLField(blank=True)
     program = models.CharField(max_length=100, blank=True, verbose_name="Major/Program")
     grade = models.CharField(max_length=20, blank=True, verbose_name="Grade/Year")
+    # When True, user's posts/comments will show their real name by default.
+    post_with_real_name = models.BooleanField(default=False)
     
     class Meta:
         verbose_name = 'Custom User'

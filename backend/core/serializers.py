@@ -6,9 +6,21 @@ class UserLiteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
     display_name = serializers.SerializerMethodField()
+    post_with_real_name = serializers.SerializerMethodField()
 
     def get_display_name(self, obj):
+        # If user prefers real-name posts, show first/last name if available
+        try:
+            if getattr(obj, 'post_with_real_name', False):
+                full = ' '.join(filter(None, [getattr(obj, 'first_name', ''), getattr(obj, 'last_name', '')])).strip()
+                if full:
+                    return full
+        except Exception:
+            pass
         return getattr(obj, 'display_name', '') or getattr(obj, 'username', '')
+
+    def get_post_with_real_name(self, obj):
+        return bool(getattr(obj, 'post_with_real_name', False))
 
 
 class CommentSerializer(serializers.ModelSerializer):

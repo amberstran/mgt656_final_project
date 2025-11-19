@@ -110,7 +110,34 @@ def profile_api_view(request):
         "level_hint": level["hint"]
     })
     
-    return JsonResponse({"stats": stats})
+    # If user is authenticated, include basic user info and preferences
+    user_data = None
+    if request.user and getattr(request.user, 'is_authenticated', False):
+        user = request.user
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'post_with_real_name': bool(getattr(user, 'post_with_real_name', False)),
+        }
+
+    # Support updating the post_with_real_name flag via POST
+    if request.method == 'POST':
+        if not request.user or not request.user.is_authenticated:
+            return JsonResponse({'detail': 'Authentication required'}, status=401)
+        try:
+            import json
+            payload = json.loads(request.body.decode('utf-8') or '{}')
+        except Exception:
+            payload = {}
+        if 'post_with_real_name' in payload:
+            request.user.post_with_real_name = bool(payload.get('post_with_real_name'))
+            request.user.save()
+            user_data['post_with_real_name'] = bool(request.user.post_with_real_name)
+            return JsonResponse({'user': user_data})
+
+    return JsonResponse({"stats": stats, 'user': user_data})
 
 # ============================================================================
 # VIEWS: REGISTRATION & EMAIL VERIFICATION
@@ -337,6 +364,9 @@ class PostViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         data = request.data.copy()
+        # If client didn't provide is_anonymous, default to the inverse of user's preference
+        if 'is_anonymous' not in data:
+            data['is_anonymous'] = not bool(getattr(user, 'post_with_real_name', False))
         data['post'] = post.id
         data['user'] = user.id
         serializer = CommentSerializer(data=data, context={'request': request})
@@ -348,7 +378,13 @@ class PostViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
             raise PermissionError('Authentication required')
-        serializer.save(user=self.request.user)
+        # Determine anonymity: prefer explicit client value; otherwise default to
+        # user's profile preference (post_with_real_name).
+        user = self.request.user
+        is_anonymous = serializer.validated_data.get('is_anonymous', None)
+        if is_anonymous is None:
+            is_anonymous = not bool(getattr(user, 'post_with_real_name', False))
+        serializer.save(user=user, is_anonymous=is_anonymous)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
