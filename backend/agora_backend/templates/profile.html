@@ -110,15 +110,15 @@
 
     <div class="bar-list">
       {% if user.is_authenticated %}
-        <div class="bar">My posts (coming soon)</div>
-        <div class="bar">My comments (coming soon)</div>
+        <div class="bar" onclick="window.location.href='/profile/my-posts/'" style="cursor:pointer;">My posts</div>
+        <div class="bar" onclick="window.location.href='/profile/my-comments/'" style="cursor:pointer;">My comments</div>
         <div class="bar">Agora Sparks</div>
         <div class="bar" style="cursor: default; opacity: .6;">Profile editing (soon)</div>
       {% else %}
         <div class="bar" style="background:#fff7e6; border-color:#f5c46b;">Your journey in days</div>
-        <div class="bar" onclick="window.location.href='/register/'" style="background:#e6f0ff; border-color:#87adef; cursor: pointer;">Sign in to participate</div>
-        <div class="bar" style="cursor: default; opacity: .6;">My post</div>
-        <div class="bar" style="cursor: default; opacity: .6;">My comments</div>
+        <div class="bar" onclick="window.location.href='/accounts/login/?next=/profile/'" style="background:#e6f0ff; border-color:#87adef; cursor: pointer;">Sign in to participate</div>
+        <a class="bar" href="/profile/my-posts/">My posts</a>
+        <a class="bar" href="/profile/my-comments/">My comments</a>
       {% endif %}
     </div>
   </div>

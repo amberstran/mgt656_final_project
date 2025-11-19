@@ -8,6 +8,17 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
 from django.db import IntegrityError
+from django.db.models import Count
+
+# DRF imports for Posts API
+from rest_framework import viewsets, status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
+from .models import Post, Comment, Like
+from .serializers import PostSerializer, CommentSerializer
 
 """Profile-focused views only.
 
@@ -65,6 +76,18 @@ def profile_view(request):
     })
     
     return render(request, "profile.html", {"stats": stats})
+
+
+@login_required
+def my_posts_view(request):
+    posts = Post.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, "my_posts.html", {"posts": posts})
+
+
+@login_required
+def my_comments_view(request):
+    comments = Comment.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, "my_comments.html", {"comments": comments})
 
 
 def profile_api_view(request):
@@ -268,6 +291,73 @@ def verify_email_view(request, uidb64, token):
         })
     
     return render(request, 'verify_email.html', {'user': user})
+
+
+# =============================
+# Posts API (for React frontend)
+# =============================
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
+    serializer_class = PostSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser, JSONParser]
+
+    def get_queryset(self):
+        queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
+        _feed = self.request.query_params.get('feed')
+        return queryset
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        like, created = Like.objects.get_or_create(user=user, post=post)
+        if not created:
+            like.delete()
+            liked = False
+        else:
+            liked = True
+
+        likes_count = post.likes.count()
+        return Response({'liked': liked, 'likes_count': likes_count})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def comment(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        if not user or not user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        data = request.data.copy()
+        data['post'] = post.id
+        data['user'] = user.id
+        serializer = CommentSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
+
+    def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise PermissionError('Authentication required')
+        serializer.save(user=self.request.user)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        user = request.user
+        if not user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=401)
+        if instance.user != user and not user.is_staff:
+            return Response({'detail': 'You do not have permission to delete this post.'}, status=403)
+        return super().destroy(request, *args, **kwargs)
 
 
 # Registration & email verification views removed.

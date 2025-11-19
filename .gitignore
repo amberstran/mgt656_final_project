@@ -1,30 +1,61 @@
-# --- Python / Django ---
+# Python
 __pycache__/
 *.py[cod]
-*.sqlite3
-*.log
-*.pot
+*$py.class
+*.so
+.Python
 *.pyc
 *.pyo
 *.pyd
 
+# Django
+*.log
+*.pot
+local_settings.py
+backend/agora_backend/settings_local.py
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+
 # Virtual environment
 venv/
 env/
+ENV/
+.venv
 
-# Django local settings
-backend/agora_backend/settings_local.py
+# Environment variables
+.env
+.env.local
 
-# --- Node / Frontend ---
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / Frontend
 node_modules/
 frontend/node_modules/
 frontend/dist/
 frontend/build/
+backend/agora_frontend/build/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# --- VSCode / System ---
-.vscode/
-.DS_Store
-.idea/
+# Build / Packaging
+build/
+dist/
+*.egg-info/
 
-# --- Secrets ---
-.env
+# React env files
+backend/agora_frontend/.env.local
+backend/agora_frontend/.env.development.local
+backend/agora_frontend/.env.test.local
+backend/agora_frontend/.env.production.local
