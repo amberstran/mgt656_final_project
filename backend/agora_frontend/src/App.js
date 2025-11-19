@@ -2,11 +2,17 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import PostsList from './components/PostsList';
 import Login from './components/Login';
+import Landing from './components/Landing';
+import BottomNav from './components/BottomNav';
+import CreatePostModal from './components/CreatePostModal';
 import axios from 'axios';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
+  const [showLanding, setShowLanding] = useState(true);
   const [feedType, setFeedType] = useState('new');
+  const [showCreate, setShowCreate] = useState(false);
+  const [reloadSignal, setReloadSignal] = useState(0);
 
   // Fetch CSRF token on app load
   useEffect(() => {
@@ -20,36 +26,40 @@ function App() {
       });
   }, []);
 
+  if (showLanding) {
+    return <Landing onEnter={() => setShowLanding(false)} />;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="agora-header">
-        <div className="agora-header-content">
+        <div className="agora-header-content" style={{ justifyContent: 'center' }}>
           <div className="yale-logo-text">YALE</div>
-          <h1 className="text-4xl font-bold text-white text-center drop-shadow">Agora</h1>
-          <div className="flex items-center gap-4">
-            <div>
-              <label className="mr-2 text-white text-sm">Sort:</label>
-              <select 
-                value={feedType} 
-                onChange={(e) => setFeedType(e.target.value)} 
-                className="border rounded p-1 text-sm"
+          <h1 className="text-4xl font-bold text-white text-center drop-shadow" style={{ margin: '0 2rem' }}>Agora</h1>
+          <div className="bg-white/20 rounded-lg p-1 flex text-white text-sm">
+            {['new','top'].map((t) => (
+              <button
+                key={t}
+                onClick={() => setFeedType(t)}
+                className={`px-3 py-1 rounded-md transition-colors ${feedType === t ? 'bg-white text-blue-700' : 'text-white/90 hover:bg-white/10'}`}
               >
-                <option value="new">New</option>
-                <option value="all">All</option>
-                <option value="top">Top</option>
-              </select>
-            </div>
-            <button
-              onClick={() => setShowLogin(!showLogin)}
-              className="ml-4 px-5 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow transform hover:scale-105 active:scale-95"
-            >
-              {showLogin ? '✕ Close' : '🔑 Login'}
-            </button>
+                {t === 'new' ? 'Latest' : 'Hot'}
+              </button>
+            ))}
           </div>
         </div>
       </div>
       {showLogin && <Login onLogin={() => setShowLogin(false)} />}
-      <PostsList feedType={feedType} />
+      <PostsList feedType={feedType} reloadSignal={reloadSignal} />
+      <BottomNav
+        onCreate={() => setShowCreate(true)}
+        onProfile={() => { window.location.href = '/profile/'; }}
+      />
+      <CreatePostModal
+        open={showCreate}
+        onClose={() => setShowCreate(false)}
+        onCreated={() => setReloadSignal((s) => s + 1)}
+      />
     </div>
   );
 }

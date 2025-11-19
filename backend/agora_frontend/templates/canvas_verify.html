@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Canvas Verification</title>
+  <style>
+    body { background:#0f1115; color:#e6ebf5; font-family:Inter,system-ui; margin:0; padding:40px; }
+    .card { max-width:720px; margin:0 auto; background:#151923; border:1px solid rgba(255,255,255,.06); border-radius:16px; padding:24px; }
+    a.btn { display:inline-block; margin-top:12px; padding:10px 14px; border-radius:10px; background:linear-gradient(135deg,#ff8a00,#e52e71); color:white; text-decoration:none; }
+    .muted { color:#9aa4b2; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Verify your NetID on Canvas</h2>
+    <p class="muted">Bind your NetID to unlock badges and Aurora-tier perks.</p>
+    {% if CANVAS_EXTERNAL_URL %}
+      <a class="btn" href="{{ CANVAS_EXTERNAL_URL }}">Open Canvas</a>
+    {% else %}
+      <p>Ask admin to set <code>CANVAS_EXTERNAL_URL</code> in <code>settings.py</code>, or implement your in-site verification flow here.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

@@ -47,7 +47,15 @@ export const loginUser = (credentials) => API.post('auth/login/', credentials);
 // fetchPosts supports pagination: page (1-based) and optional page_size
 export const fetchPosts = (type, page = 1, page_size = 10) =>
   API.get(`posts/?feed=${type}&page=${page}&page_size=${page_size}`);
-export const createPost = (postData) => API.post('posts/', postData);
+export const createPost = (postData) => {
+  // If a FormData is passed (for image upload), use multipart
+  if (typeof FormData !== 'undefined' && postData instanceof FormData) {
+    return API.post('posts/', postData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
+  return API.post('posts/', postData);
+};
 // Note: These endpoints are not yet implemented in the backend
 // They return 404 but won't cause 400 errors
 export const fetchCircles = () => API.get('circles/').catch(err => {

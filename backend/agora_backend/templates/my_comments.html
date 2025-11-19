@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>My Comments | Agora</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif; margin: 24px; }
+    .comment { border: 1px solid #eee; border-radius: 8px; padding: 16px; margin-bottom: 12px; }
+    .meta { color: #666; font-size: 12px; }
+    a { color: #0a58ca; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <h2>My Comments</h2>
+  <p><a href="/profile/">← Back to profile</a></p>
+  {% if comments %}
+    {% for c in comments %}
+      <div class="comment">
+        <div class="meta">On post: {{ c.post.title }} • {{ c.created_at|date:"Y-m-d H:i" }}</div>
+        <p>{{ c.content }}</p>
+      </div>
+    {% endfor %}
+  {% else %}
+    <p>You haven’t commented yet.</p>
+  {% endif %}
+</body>
+</html>

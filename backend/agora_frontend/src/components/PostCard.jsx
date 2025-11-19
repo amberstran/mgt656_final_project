@@ -47,31 +47,68 @@ const PostCard = ({ post, onDelete }) => {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg p-6 mb-6 shadow-md bg-white hover:shadow-lg transition-shadow duration-200">
-      <div className="flex justify-between items-center text-sm text-gray-600 mb-3">
-        <span className="font-medium">{post.is_anonymous ? 'Anonymous' : (post.user.display_name || post.user.username)}</span>
-        <span className="text-gray-500">{new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+    <div className="post-card">
+      {/* Header: Author and Date */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+        <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#555' }}>
+          {post.is_anonymous ? 'Anonymous' : (post.user.display_name || post.user.username)}
+        </span>
+        <span style={{ fontSize: '0.75rem', color: '#999' }}>
+          {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+        </span>
       </div>
-      <h3 className="font-bold text-xl mb-2 text-gray-900">{post.title}</h3>
-      <p className="text-gray-700 mb-4 leading-relaxed">{post.content}</p>
-      <div className="mt-4 flex items-center space-x-4 pb-4 border-b border-gray-100">
-        <div>
-          <button
-            onClick={onLike}
-            disabled={loading}
-            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 ${
-              liked 
-                ? 'bg-red-100 text-red-600 hover:bg-red-200' 
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-          >
-            <span className="text-lg mr-1">{liked ? '♥' : '♡'}</span>
-            <span>{likesCount}</span>
-          </button>
-          {likeError && (
-            <div className="text-xs text-red-600 mt-1 animate-pulse">{likeError}</div>
-          )}
+
+      {/* Title */}
+      <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '0.5rem', color: '#222' }}>{post.title}</h3>
+
+      {/* Content */}
+      <p style={{ fontSize: '0.95rem', color: '#555', lineHeight: '1.6', marginBottom: '1rem' }}>{post.content}</p>
+
+      {/* Image if present */}
+      {(post.image || post.image_url) && (
+        <div style={{ marginTop: '0.75rem', marginBottom: '1rem' }}>
+          {(() => {
+            const raw = post.image || post.image_url;
+            let src = raw;
+            if (typeof raw === 'string' && raw.startsWith('/')) {
+              const apiUrl = (process.env.REACT_APP_API_URL || 'http://localhost:8000').replace(/\/$/, '');
+              src = apiUrl + raw;
+            }
+            return (
+              <img
+                src={src}
+                alt="Post attachment"
+                style={{ maxHeight: '320px', width: '100%', objectFit: 'contain', borderRadius: '8px', border: '1px solid #e5e5e5' }}
+              />
+            );
+          })()}
         </div>
+      )}
+
+      {/* Actions: Like and Delete */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid #f0f0f0' }}>
+        <button
+          onClick={onLike}
+          disabled={loading}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            fontWeight: '500',
+            fontSize: '0.9rem',
+            border: 'none',
+            background: liked ? '#fee' : '#f5f5f5',
+            color: liked ? '#c33' : '#666',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.6 : 1,
+            transition: 'all 0.2s ease',
+          }}
+        >
+          <span style={{ fontSize: '1.1rem', marginRight: '0.25rem' }}>{liked ? '♥' : '♡'}</span>
+          {likesCount}
+        </button>
+        {likeError && (
+          <div style={{ fontSize: '0.75rem', color: '#c33' }}>{likeError}</div>
+        )}
         <button
           onClick={async () => {
             if (deleting) return;
@@ -88,57 +125,70 @@ const PostCard = ({ post, onDelete }) => {
             }
           }}
           disabled={deleting}
-          className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-red-50 hover:text-red-600 text-sm font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            fontWeight: '500',
+            border: 'none',
+            background: '#f5f5f5',
+            color: '#666',
+            cursor: deleting ? 'not-allowed' : 'pointer',
+            opacity: deleting ? 0.6 : 1,
+            transition: 'all 0.2s ease',
+          }}
         >
           {deleting ? 'Deleting…' : 'Delete'}
         </button>
       </div>
 
       {/* Comments Section */}
-      <div className="mt-6">
-        <h4 className="font-semibold mb-4 text-gray-800 flex items-center">
-          <span className="mr-2">💬</span>
-          Comments {comments.length > 0 && <span className="text-gray-500 font-normal ml-2">({comments.length})</span>}
+      <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}>
+        <h4 style={{ fontSize: '0.95rem', fontWeight: '600', marginBottom: '1rem', color: '#333', display: 'flex', alignItems: 'center' }}>
+          <span style={{ marginRight: '0.5rem' }}>💬</span>
+          Comments {comments.length > 0 && <span style={{ color: '#999', fontWeight: '400', marginLeft: '0.5rem' }}>({comments.length})</span>}
         </h4>
         {comments.length === 0 && (
-          <div className="text-gray-500 text-center py-4 italic">No comments yet. Be the first to comment!</div>
+          <div style={{ color: '#999', textAlign: 'center', padding: '1rem', fontSize: '0.875rem', fontStyle: 'italic' }}>
+            No comments yet. Be the first to comment!
+          </div>
         )}
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           {comments.map((comment) => (
-            <div key={comment.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors duration-150">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold text-gray-700">
+            <div key={comment.id} style={{ border: '1px solid #e5e5e5', borderRadius: '8px', padding: '0.75rem', background: '#fafafa' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>
                   {comment.is_anonymous ? 'Anonymous' : (comment.user.display_name || comment.user.username)}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span style={{ fontSize: '0.75rem', color: '#999' }}>
                   {new Date(comment.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
-              <div className="text-gray-800 mb-3 leading-relaxed">{comment.content}</div>
+              <div style={{ fontSize: '0.9rem', color: '#444', lineHeight: '1.5', marginBottom: '0.5rem' }}>{comment.content}</div>
               <button
-                className="text-blue-600 text-sm mt-1 hover:text-blue-800 font-medium transition-colors duration-150 flex items-center"
+                style={{ fontSize: '0.8rem', color: '#667eea', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem 0' }}
                 onClick={() => {
                   setReplyingTo(comment.id);
                   setReplyText('');
                   setReplyError('');
                 }}
               >
-                <span className="mr-1">↩️</span> Reply
+                ↩️ Reply
               </button>
               {/* Replies */}
               {comment.replies && comment.replies.length > 0 && (
-                <div className="ml-6 mt-3 space-y-2 border-l-2 border-blue-200 pl-4">
+                <div style={{ marginLeft: '1.5rem', marginTop: '0.75rem', paddingLeft: '1rem', borderLeft: '2px solid #d0d0f0', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {comment.replies.map((reply) => (
-                    <div key={reply.id} className="bg-white rounded p-3 border border-gray-200">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-xs font-semibold text-gray-700">
+                    <div key={reply.id} style={{ background: 'white', borderRadius: '6px', padding: '0.5rem', border: '1px solid #e5e5e5' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '600', color: '#555' }}>
                           {reply.is_anonymous ? 'Anonymous' : (reply.user.display_name || reply.user.username)}
                         </span>
-                        <span className="text-xs text-gray-500">
+                        <span style={{ fontSize: '0.7rem', color: '#999' }}>
                           {new Date(reply.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>
-                      <div className="text-sm text-gray-800">{reply.content}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#444' }}>{reply.content}</div>
                     </div>
                   ))}
                 </div>
@@ -146,7 +196,7 @@ const PostCard = ({ post, onDelete }) => {
               {/* Reply form */}
               {replyingTo === comment.id && (
                 <form
-                  className="mt-3 animate-fadeIn"
+                  style={{ marginTop: '0.75rem' }}
                   onSubmit={async (e) => {
                     e.preventDefault();
                     if (!replyText.trim()) return;
@@ -172,25 +222,25 @@ const PostCard = ({ post, onDelete }) => {
                     }
                   }}
                 >
-                  <div className="flex items-start gap-2">
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <input
                       type="text"
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
-                      className="border border-gray-300 px-3 py-2 rounded-lg flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      style={{ flex: 1, border: '1px solid #ddd', padding: '0.5rem 0.75rem', borderRadius: '6px', fontSize: '0.875rem' }}
                       placeholder="Write a reply..."
                       disabled={replyLoading}
                     />
-                    <button 
-                      type="submit" 
-                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 text-sm font-medium transition-colors duration-200 disabled:cursor-not-allowed shadow-sm hover:shadow" 
+                    <button
+                      type="submit"
+                      style={{ padding: '0.5rem 1rem', background: '#667eea', color: 'white', border: 'none', borderRadius: '6px', fontSize: '0.85rem', fontWeight: '500', cursor: replyLoading ? 'not-allowed' : 'pointer', opacity: replyLoading ? 0.6 : 1 }}
                       disabled={replyLoading}
                     >
                       {replyLoading ? 'Posting...' : 'Post'}
                     </button>
-                    <button 
-                      type="button" 
-                      className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 font-medium transition-colors" 
+                    <button
+                      type="button"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.85rem', color: '#666', background: 'none', border: 'none', cursor: 'pointer' }}
                       onClick={() => {
                         setReplyingTo(null);
                         setReplyText('');
@@ -201,7 +251,7 @@ const PostCard = ({ post, onDelete }) => {
                     </button>
                   </div>
                   {replyError && (
-                    <div className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded animate-pulse">{replyError}</div>
+                    <div style={{ fontSize: '0.75rem', color: '#c33', marginTop: '0.5rem', background: '#fee', padding: '0.5rem', borderRadius: '4px' }}>{replyError}</div>
                   )}
                 </form>
               )}
@@ -211,7 +261,7 @@ const PostCard = ({ post, onDelete }) => {
 
         {/* Add comment form */}
         <form
-          className="mt-4 pt-4 border-t border-gray-200"
+          style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}
           onSubmit={async (e) => {
             e.preventDefault();
             if (!commentText.trim()) return;
@@ -230,25 +280,25 @@ const PostCard = ({ post, onDelete }) => {
             }
           }}
         >
-          <div className="flex items-start gap-2">
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
             <input
               type="text"
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
-              className="border border-gray-300 px-4 py-2 rounded-lg flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              style={{ flex: 1, border: '1px solid #ddd', padding: '0.65rem 1rem', borderRadius: '8px', fontSize: '0.9rem' }}
               placeholder="Add a comment..."
               disabled={commentLoading}
             />
-            <button 
-              type="submit" 
-              className="px-5 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 font-medium transition-all duration-200 shadow-sm hover:shadow disabled:cursor-not-allowed" 
+            <button
+              type="submit"
+              style={{ padding: '0.65rem 1.25rem', background: '#667eea', color: 'white', border: 'none', borderRadius: '8px', fontSize: '0.9rem', fontWeight: '600', cursor: commentLoading ? 'not-allowed' : 'pointer', opacity: commentLoading ? 0.6 : 1, transition: 'all 0.2s ease' }}
               disabled={commentLoading}
             >
               {commentLoading ? 'Posting...' : 'Post'}
             </button>
           </div>
           {commentError && (
-            <div className="text-xs text-red-600 mt-2 bg-red-50 p-2 rounded animate-pulse">{commentError}</div>
+            <div style={{ fontSize: '0.75rem', color: '#c33', marginTop: '0.5rem', background: '#fee', padding: '0.5rem', borderRadius: '4px' }}>{commentError}</div>
           )}
         </form>
       </div>

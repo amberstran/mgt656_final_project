@@ -24,56 +24,50 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-8 mb-8 p-8 bg-white rounded-xl shadow-lg border border-gray-200 animate-fadeIn">
-      <div className="text-center mb-6">
-        <div className="text-4xl mb-2">🔐</div>
-        <h2 className="text-3xl font-bold text-gray-800">Login</h2>
-        <p className="text-gray-500 text-sm mt-2">Sign in to like and comment</p>
+    <div className="login-panel">
+      <div style={{ textAlign: 'center', marginBottom: '1.25rem' }}>
+        <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>🔐</div>
+        <h2 style={{ margin: 0, fontSize: '1.5rem', fontWeight: '700', color: '#222' }}>Login</h2>
+        <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.875rem', color: '#999' }}>Sign in to like and comment</p>
       </div>
-      <form onSubmit={handleSubmit} className="space-y-5">
-        <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-700">Username</label>
+      <form onSubmit={handleSubmit}>
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Username</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            style={{ width: '100%', border: '2px solid #ddd', borderRadius: '8px', padding: '0.75rem', fontSize: '0.95rem' }}
             required
             disabled={loading}
           />
         </div>
-        <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-700">Password</label>
+        <div style={{ marginBottom: '1rem' }}>
+          <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#333' }}>Password</label>
           <input
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            style={{ width: '100%', border: '2px solid #ddd', borderRadius: '8px', padding: '0.75rem', fontSize: '0.95rem' }}
             required
             disabled={loading}
           />
         </div>
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-600 p-3 rounded-lg text-sm animate-pulse">
+          <div style={{ background: '#fee', border: '1px solid #fcc', color: '#c33', padding: '0.75rem', borderRadius: '8px', fontSize: '0.875rem', marginBottom: '1rem' }}>
             {error}
           </div>
         )}
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold transition-all duration-200 shadow-md hover:shadow-lg disabled:cursor-not-allowed transform hover:scale-[1.02] active:scale-[0.98]"
+          style={{ width: '100%', background: '#667eea', color: 'white', padding: '0.75rem', borderRadius: '8px', fontWeight: '600', fontSize: '0.95rem', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.6 : 1 }}
         >
-          {loading ? (
-            <span className="flex items-center justify-center">
-              <span className="animate-spin mr-2">⏳</span> Logging in...
-            </span>
-          ) : (
-            'Login'
-          )}
+          {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
-      <p className="mt-6 text-sm text-gray-600 text-center">
-        Or login via <a href="http://localhost:8000/admin/" target="_blank" className="text-blue-600 hover:text-blue-800 font-medium underline">Django Admin</a>
+      <p style={{ marginTop: '1.25rem', fontSize: '0.875rem', color: '#999', textAlign: 'center' }}>
+        Or login via <a href="http://localhost:8000/admin/" target="_blank" rel="noreferrer" style={{ color: '#667eea', fontWeight: '500' }}>Django Admin</a>
       </p>
     </div>
   );
