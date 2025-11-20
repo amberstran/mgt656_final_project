@@ -15,19 +15,35 @@ class CommentSerializer(serializers.ModelSerializer):
     user = UserLiteSerializer(read_only=True)
     replies = serializers.SerializerMethodField()
     parent = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False, allow_null=True)
+    # Expose post as read-only so client doesn't need to send it.
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'content', 'is_anonymous', 'created_at', 'parent', 'replies']
-        read_only_fields = ['id', 'user', 'created_at', 'replies']
+        fields = ['id', 'user', 'post', 'content', 'is_anonymous', 'created_at', 'parent', 'replies']
+        read_only_fields = ['id', 'user', 'post', 'created_at', 'replies']
 
     def get_replies(self, obj):
-        # Return serialized replies (children) - only top-level comments have replies
         if obj.parent is None:
             replies = obj.replies.all()
             if replies.exists():
                 return CommentSerializer(replies, many=True, context=self.context).data
         return []
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        request = self.context.get('request')
+        viewer = getattr(request, 'user', None)
+        if instance.is_anonymous:
+            is_owner = bool(viewer and viewer.is_authenticated and viewer.id == getattr(instance.user, 'id', None))
+            is_staff = bool(viewer and getattr(viewer, 'is_staff', False))
+            if not (is_owner or is_staff):
+                data['user'] = {
+                    'id': None,
+                    'username': 'Anonymous',
+                    'display_name': 'Anonymous',
+                }
+        return data
 
 
 class PostSerializer(serializers.ModelSerializer):

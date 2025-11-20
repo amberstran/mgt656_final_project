@@ -27,11 +27,13 @@ class CommentSerializer(serializers.ModelSerializer):
     user = UserLiteSerializer(read_only=True)
     replies = serializers.SerializerMethodField()
     parent = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False, allow_null=True)
+    # We expose the post as a read-only field so clients don't have to pass it.
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'content', 'is_anonymous', 'created_at', 'parent', 'replies']
-        read_only_fields = ['id', 'user', 'created_at', 'replies']
+    fields = ['id', 'user', 'post', 'content', 'is_anonymous', 'created_at', 'parent', 'replies']
+    read_only_fields = ['id', 'user', 'post', 'created_at', 'replies']
 
     def get_replies(self, obj):
         if obj.parent is None:

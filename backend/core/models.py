@@ -77,3 +77,50 @@ class Like(models.Model):
     def __str__(self):
         return f"{self.user} likes {self.post}"
 
+
+class CircleMembership(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE)
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "circle")
+
+    def __str__(self):
+        return f"{self.user} in {self.circle}"
+
+
+class Message(models.Model):
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, related_name="messages")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content = models.TextField()
+    is_anonymous = models.BooleanField(default=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Message in {self.circle} by {'Anonymous' if self.is_anonymous else self.user}"
+
+
+class Report(models.Model):
+    CONTENT_CHOICES = [
+        ("post", "Post"),
+        ("comment", "Comment"),
+        ("message", "Message"),
+    ]
+
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("resolved", "Resolved"),
+        ("dismissed", "Dismissed"),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    content_type = models.CharField(max_length=20, choices=CONTENT_CHOICES)
+    object_id = models.PositiveIntegerField()
+    reason = models.TextField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Report by {self.user} on {self.content_type} {self.object_id}"
+
