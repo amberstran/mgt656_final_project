@@ -1,0 +1,35 @@
+.circles-panel {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem;
+}
+.circles-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+.circle-pill {
+  padding: 0.5rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: white;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+  transition: all 0.14s ease;
+}
+.circle-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(20,20,40,0.04); }
+.circle-pill.selected { border: 2px solid #667eea; background: #eef2ff; }
+.circle-name { font-weight: 600; color: #111827; }
+.circle-count { color: #6b7280; font-size: 0.85rem; }
+.circle-action { margin-left: 0.5rem; }
+.circle-action button { padding: 0.25rem 0.5rem; border-radius: 6px; border: none; cursor: pointer; }
+.join-btn { background: #667eea; color: white; }
+.leave-btn { background: white; color: #c33; border: 1px solid #f3c2c2; }
+
+@media (max-width: 640px) {
+  .circles-panel { padding: 0.5rem; }
+  .circle-pill { padding: 0.45rem 0.6rem; font-size: 0.95rem; }
+}

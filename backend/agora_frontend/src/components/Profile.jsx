@@ -11,6 +11,9 @@ function Profile() {
     likes: 12,
     score: 8,
   });
+  // user preference state for posting with real name
+  const [postWithRealName, setPostWithRealName] = useState(false);
+  const [savingPref, setSavingPref] = useState(false);
 
   const [activeTab, setActiveTab] = useState('messages');
 
@@ -43,16 +46,48 @@ function Profile() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin',
       });
 
       if (response.ok) {
         const data = await response.json();
         setStats(data.stats || stats);
+        // set preference if available
+        if (data.user && typeof data.user.post_with_real_name !== 'undefined') {
+          setPostWithRealName(Boolean(data.user.post_with_real_name));
+        }
       } else {
         console.warn('Failed to fetch profile data');
       }
     } catch (error) {
       console.error('Error fetching profile data:', error);
+    }
+  };
+
+  const updatePostWithRealName = async (value) => {
+    setSavingPref(true);
+    // optimistic update
+    const prev = postWithRealName;
+    setPostWithRealName(Boolean(value));
+    try {
+      const res = await fetch('/api/profile/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ post_with_real_name: Boolean(value) }),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to save preference');
+      }
+      // optionally refresh data
+      // const payload = await res.json();
+    } catch (err) {
+      console.error(err);
+      // revert on failure
+      setPostWithRealName(prev);
+      alert('Unable to save preference. Please try again.');
+    } finally {
+      setSavingPref(false);
     }
   };
 
@@ -101,6 +136,19 @@ function Profile() {
 
       {/* Bar List */}
       <div className="bar-list">
+        {/* Real-name posting toggle */}
+        <div className="bar toggle-row">
+          <div style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%'}}>
+            <div style={{textAlign: 'left'}}>
+              <div style={{fontWeight: 700}}>Show my real name on posts</div>
+              <div style={{fontSize: 12, color: '#666'}}>When enabled, your posts and comments will use your first/last name instead of Anonymous.</div>
+            </div>
+            <label className="toggle-switch">
+              <input type="checkbox" checked={postWithRealName} disabled={savingPref} onChange={(e) => updatePostWithRealName(e.target.checked)} />
+              <span className="slider" />
+            </label>
+          </div>
+        </div>
         {barItems.map((item) => (
           <div
             key={item.id}

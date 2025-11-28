@@ -34,3 +34,34 @@ def login_view(request):
     else:
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+
+@api_view(['GET'])
+def me_view(request):
+    """Return basic information about the currently authenticated user.
+
+    Useful for debugging session/CSRF issues from the frontend.
+    Response shape:
+      { "authenticated": bool, "user": {id, username} | null }
+    """
+    user = getattr(request, 'user', None)
+    if user and getattr(user, 'is_authenticated', False):
+        return Response({
+            'authenticated': True,
+            'user': {'id': user.id, 'username': user.username}
+        })
+    return Response({'authenticated': False, 'user': None})
+
+
+@api_view(['GET'])
+def debug_cookies_view(request):
+    """Return raw cookies and auth status for debugging.
+
+    DO NOT enable in production without restriction; useful for local dev.
+    """
+    user = getattr(request, 'user', None)
+    return Response({
+        'authenticated': bool(user and getattr(user, 'is_authenticated', False)),
+        'cookie_keys': list(request.COOKIES.keys()),
+        'cookies': {k: ('<hidden>' if k.lower() == 'sessionid' else v) for k, v in request.COOKIES.items()},
+    })
+

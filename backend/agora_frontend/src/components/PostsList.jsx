@@ -3,7 +3,7 @@ import PostCard from './PostCard';
 import PostModal from './PostModal';
 import { fetchPosts } from '../api';
 
-const PostsList = ({ feedType = 'new', pageSize = 10, reloadSignal = 0 }) => {
+const PostsList = ({ feedType = 'new', pageSize = 10, reloadSignal = 0, circleId = null }) => {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -22,7 +22,7 @@ const PostsList = ({ feedType = 'new', pageSize = 10, reloadSignal = 0 }) => {
     setLoading(true);
     setError(null);
     try {
-  const res = await fetchPosts(feedType, p, pageSize);
+    const res = await fetchPosts(feedType, p, pageSize, circleId);
   const payload = res.data;
   // support DRF pagination (payload.results) or plain array
   const data = Array.isArray(payload) ? payload : (payload.results || []);
@@ -41,15 +41,15 @@ const PostsList = ({ feedType = 'new', pageSize = 10, reloadSignal = 0 }) => {
       isFetchingRef.current = false;
       setLoading(false);
     }
-  }, [feedType, pageSize]);
+  }, [feedType, pageSize, circleId]);
 
   useEffect(() => {
-    // reset when feedType or reloadSignal changes
+    // reset when feedType, reloadSignal or circleId changes
     setPage(1);
     setHasMore(true);
     setPosts([]);
     loadPage(1);
-  }, [feedType, reloadSignal, loadPage]);
+  }, [feedType, reloadSignal, circleId, loadPage]);
 
   useEffect(() => {
     if (!observerRef.current) return;
@@ -80,10 +80,10 @@ const PostsList = ({ feedType = 'new', pageSize = 10, reloadSignal = 0 }) => {
     loadPage(page);
   }, [page, loadPage]);
 
-  // ensure lock is cleared when feedType resets
+  // ensure lock is cleared when feedType or circleId resets
   useEffect(() => {
     isFetchingRef.current = false;
-  }, [feedType]);
+  }, [feedType, circleId]);
 
   const handleDelete = (postId) => {
     setPosts((prev) => prev.filter((p) => p.id !== postId));
@@ -133,7 +133,7 @@ const PostsList = ({ feedType = 'new', pageSize = 10, reloadSignal = 0 }) => {
   return (
     <div style={{ maxWidth: '720px', margin: '0 auto', padding: '1.5rem 1rem', paddingBottom: '5rem' }}>
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} onDelete={handleDelete} />
+        <PostCard key={post.id} post={post} onDelete={handleDelete} onOpen={openPost} />
       ))}
 
       {loading && posts.length > 0 && <div style={{ textAlign: 'center', padding: '1rem', color: '#999' }}>Loading more posts…</div>}

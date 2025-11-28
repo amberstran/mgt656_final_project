@@ -16,14 +16,23 @@ function getCookie(name) {
   return cookieValue;
 }
 
-// Get API URL from environment, ensure it ends with /api/
-let apiBaseUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-// Remove trailing slash if present, then add /api/
-apiBaseUrl = apiBaseUrl.replace(/\/$/, '') + '/api/';
+// Determine API base URL.
+// In development we rely on Create React App's proxy (package.json "proxy") so all
+// requests to '/api/*' are forwarded to http://localhost:8000. This keeps the
+// origin consistent (http://localhost:3000) and Safari will send session cookies.
+// In production, fall back to REACT_APP_API_URL or localhost backend.
+const isDev = process.env.NODE_ENV === 'development';
+let apiBaseUrl;
+if (isDev) {
+  apiBaseUrl = '/api/';
+} else {
+  const root = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+  apiBaseUrl = root.replace(/\/$/, '') + '/api/';
+}
 
 const API = axios.create({
-  baseURL: apiBaseUrl,  // Django DRF backend
-  withCredentials: true,                  // if using session auth
+  baseURL: apiBaseUrl, // In dev: '/api/' (proxied). In prod: full backend URL.
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -45,8 +54,11 @@ API.interceptors.request.use(
 
 export const loginUser = (credentials) => API.post('auth/login/', credentials);
 // fetchPosts supports pagination: page (1-based) and optional page_size
-export const fetchPosts = (type, page = 1, page_size = 10) =>
-  API.get(`posts/?feed=${type}&page=${page}&page_size=${page_size}`);
+export const fetchPosts = (type, page = 1, page_size = 10, circleId = null) => {
+  let url = `posts/?feed=${type}&page=${page}&page_size=${page_size}`;
+  if (circleId) url += `&circle=${encodeURIComponent(circleId)}`;
+  return API.get(url);
+};
 export const createPost = (postData) => {
   // If a FormData is passed (for image upload), use multipart
   if (typeof FormData !== 'undefined' && postData instanceof FormData) {
@@ -77,3 +89,12 @@ export const fetchProfile = (userId) => API.get(`users/${userId}/`).catch(err =>
 });
 export const toggleLike = (postId) => API.post(`posts/${postId}/like/`);
 export const addComment = (postId, data) => API.post(`posts/${postId}/comment/`, data);
+
+// Export the underlying axios instance so callers (e.g. src/index.js) can set
+// default headers (CSRF token) when needed. This avoids relying solely on
+// document.cookie which can be brittle in some dev setups.
+export { API };
+export const reportPost = (postId, data) => API.post(`posts/${postId}/report/`, data);
+export const reportComment = (commentId, data) => API.post(`comments/${commentId}/report/`, data);
+export const fetchReports = () => API.get('reports/');
+export const moderateReport = (reportId, action) => API.post(`reports/${reportId}/action/`, { action });

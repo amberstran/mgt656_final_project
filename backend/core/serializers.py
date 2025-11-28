@@ -6,20 +6,34 @@ class UserLiteSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     username = serializers.CharField(read_only=True)
     display_name = serializers.SerializerMethodField()
+    post_with_real_name = serializers.SerializerMethodField()
 
     def get_display_name(self, obj):
+        # If user prefers real-name posts, show first/last name if available
+        try:
+            if getattr(obj, 'post_with_real_name', False):
+                full = ' '.join(filter(None, [getattr(obj, 'first_name', ''), getattr(obj, 'last_name', '')])).strip()
+                if full:
+                    return full
+        except Exception:
+            pass
         return getattr(obj, 'display_name', '') or getattr(obj, 'username', '')
+
+    def get_post_with_real_name(self, obj):
+        return bool(getattr(obj, 'post_with_real_name', False))
 
 
 class CommentSerializer(serializers.ModelSerializer):
     user = UserLiteSerializer(read_only=True)
     replies = serializers.SerializerMethodField()
     parent = serializers.PrimaryKeyRelatedField(queryset=Comment.objects.all(), required=False, allow_null=True)
+    # We expose the post as a read-only field so clients don't have to pass it.
+    post = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Comment
-        fields = ['id', 'user', 'content', 'is_anonymous', 'created_at', 'parent', 'replies']
-        read_only_fields = ['id', 'user', 'created_at', 'replies']
+    fields = ['id', 'user', 'post', 'content', 'is_anonymous', 'created_at', 'parent', 'replies']
+    read_only_fields = ['id', 'user', 'post', 'created_at', 'replies']
 
     def get_replies(self, obj):
         if obj.parent is None:

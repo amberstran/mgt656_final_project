@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { toggleLike, deletePost, addComment } from '../api';
+import { toggleLike, deletePost, addComment, reportPost } from '../api';
 
-const PostCard = ({ post, onDelete }) => {
+const PostCard = ({ post, onDelete, onOpen }) => {
   const [liked, setLiked] = useState(Boolean(post.liked));
   const [likesCount, setLikesCount] = useState(post.likes_count || 0);
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,8 @@ const PostCard = ({ post, onDelete }) => {
   const [replyLoading, setReplyLoading] = useState(false);
   const [replyError, setReplyError] = useState('');
 
-  const onLike = async () => {
+  const onLike = async (e) => {
+    if (e && e.stopPropagation) e.stopPropagation();
     if (loading) return;
     setLikeError('');
     // optimistic update
@@ -47,7 +48,7 @@ const PostCard = ({ post, onDelete }) => {
   };
 
   return (
-    <div className="post-card">
+    <div className="post-card" onClick={() => onOpen && onOpen(post)} style={{ cursor: onOpen ? 'pointer' : 'default' }}>
       {/* Header: Author and Date */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
         <span style={{ fontSize: '0.875rem', fontWeight: '500', color: '#555' }}>
@@ -110,7 +111,35 @@ const PostCard = ({ post, onDelete }) => {
           <div style={{ fontSize: '0.75rem', color: '#c33' }}>{likeError}</div>
         )}
         <button
-          onClick={async () => {
+          onClick={async (e) => {
+            if (e && e.stopPropagation) e.stopPropagation();
+            const reason = window.prompt('Why are you reporting this post? (optional)');
+            if (reason === null) return; // user cancelled
+            try {
+              await reportPost(post.id, { reason: reason || 'No reason provided' });
+              alert('Report submitted. Thank you.');
+            } catch (err) {
+              console.error('Report failed', err);
+              const errorMsg = err.response?.data?.detail || err.message || 'Failed to submit report';
+              alert(errorMsg);
+            }
+          }}
+          style={{
+            padding: '0.5rem 1rem',
+            borderRadius: '8px',
+            fontSize: '0.85rem',
+            fontWeight: '500',
+            border: 'none',
+            background: '#fff5f5',
+            color: '#b33',
+            cursor: 'pointer'
+          }}
+        >
+          Report
+        </button>
+        <button
+          onClick={async (e) => {
+            if (e && e.stopPropagation) e.stopPropagation();
             if (deleting) return;
             if (!window.confirm('Delete this post?')) return;
             setDeleting(true);
@@ -165,13 +194,9 @@ const PostCard = ({ post, onDelete }) => {
                 </span>
               </div>
               <div style={{ fontSize: '0.9rem', color: '#444', lineHeight: '1.5', marginBottom: '0.5rem' }}>{comment.content}</div>
-              <button
+                <button
                 style={{ fontSize: '0.8rem', color: '#667eea', fontWeight: '500', background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem 0' }}
-                onClick={() => {
-                  setReplyingTo(comment.id);
-                  setReplyText('');
-                  setReplyError('');
-                }}
+                onClick={(e) => { if (e && e.stopPropagation) e.stopPropagation(); setReplyingTo(comment.id); setReplyText(''); setReplyError(''); }}
               >
                 ↩️ Reply
               </button>
@@ -199,6 +224,7 @@ const PostCard = ({ post, onDelete }) => {
                   style={{ marginTop: '0.75rem' }}
                   onSubmit={async (e) => {
                     e.preventDefault();
+                    if (e && e.stopPropagation) e.stopPropagation();
                     if (!replyText.trim()) return;
                     setReplyError('');
                     setReplyLoading(true);
@@ -262,8 +288,9 @@ const PostCard = ({ post, onDelete }) => {
         {/* Add comment form */}
         <form
           style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #f0f0f0' }}
-          onSubmit={async (e) => {
+            onSubmit={async (e) => {
             e.preventDefault();
+            if (e && e.stopPropagation) e.stopPropagation();
             if (!commentText.trim()) return;
             setCommentError('');
             setCommentLoading(true);

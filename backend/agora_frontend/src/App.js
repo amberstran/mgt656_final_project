@@ -6,34 +6,59 @@ import Landing from './components/Landing';
 import BottomNav from './components/BottomNav';
 import CreatePostModal from './components/CreatePostModal';
 import axios from 'axios';
+import CirclesPanel from './components/CirclesPanel';
+import BackButton from './components/BackButton';
+import AuthDebug from './components/AuthDebug';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
   const [showLanding, setShowLanding] = useState(true);
   const [feedType, setFeedType] = useState('new');
   const [showCreate, setShowCreate] = useState(false);
   const [reloadSignal, setReloadSignal] = useState(0);
+  const [selectedCircle, setSelectedCircle] = useState(null);
 
-  // Fetch CSRF token on app load
+  // Initial auth + CSRF bootstrap
   useEffect(() => {
     const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-    axios.get(`${apiUrl}/api/auth/csrf/`, { withCredentials: true })
-      .then(() => {
-        // CSRF cookie is now set
+    // Ensure CSRF cookie exists (fire-and-forget)
+    axios.get(`${apiUrl}/api/auth/csrf/`, { withCredentials: true }).catch(() => {});
+    // Check auth status
+    axios.get(`${apiUrl}/api/auth/me/`, { withCredentials: true })
+      .then(r => {
+        if (r.data?.authenticated) {
+          setIsAuthed(true);
+          setShowLogin(false);
+        } else {
+          setIsAuthed(false);
+          setShowLogin(true); // auto prompt login
+        }
       })
       .catch(err => {
-        console.error('Failed to get CSRF token:', err);
-      });
+        console.warn('Auth check failed:', err);
+        setShowLogin(true);
+      })
+      .finally(() => setAuthChecked(true));
   }, []);
 
   if (showLanding) {
     return <Landing onEnter={() => setShowLanding(false)} />;
   }
 
+  // While checking auth, show a minimal loading state
+  if (!authChecked) {
+    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="agora-header">
         <div className="agora-header-content" style={{ justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', left: '1rem' }}>
+            <BackButton />
+          </div>
           <div className="yale-logo-text">YALE</div>
           <h1 className="text-4xl font-bold text-white text-center drop-shadow" style={{ margin: '0 2rem' }}>Agora</h1>
           <div className="bg-white/20 rounded-lg p-1 flex text-white text-sm">
@@ -49,8 +74,23 @@ function App() {
           </div>
         </div>
       </div>
-      {showLogin && <Login onLogin={() => setShowLogin(false)} />}
-      <PostsList feedType={feedType} reloadSignal={reloadSignal} />
+  {showLogin && !isAuthed && (
+    <div style={{ maxWidth: 440, margin: '1rem auto' }}>
+      <Login onLogin={() => {
+        // After login, re-check auth
+        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        axios.get(`${apiUrl}/api/auth/me/`, { withCredentials: true })
+          .then(r => {
+            if (r.data?.authenticated) {
+              setIsAuthed(true);
+              setShowLogin(false);
+            }
+          });
+      }} />
+    </div>
+  )}
+  <CirclesPanel selectedCircleId={selectedCircle} onSelect={setSelectedCircle} />
+  <PostsList feedType={feedType} reloadSignal={reloadSignal} circleId={selectedCircle} />
       <BottomNav
         onCreate={() => setShowCreate(true)}
         onProfile={() => { window.location.href = '/profile/'; }}
@@ -60,6 +100,7 @@ function App() {
         onClose={() => setShowCreate(false)}
         onCreated={() => setReloadSignal((s) => s + 1)}
       />
+      <AuthDebug />
     </div>
   );
 }

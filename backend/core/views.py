@@ -15,6 +15,7 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .models import Post, Comment, Like
@@ -110,7 +111,34 @@ def profile_api_view(request):
         "level_hint": level["hint"]
     })
     
-    return JsonResponse({"stats": stats})
+    # If user is authenticated, include basic user info and preferences
+    user_data = None
+    if request.user and getattr(request.user, 'is_authenticated', False):
+        user = request.user
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'post_with_real_name': bool(getattr(user, 'post_with_real_name', False)),
+        }
+
+    # Support updating the post_with_real_name flag via POST
+    if request.method == 'POST':
+        if not request.user or not request.user.is_authenticated:
+            return JsonResponse({'detail': 'Authentication required'}, status=401)
+        try:
+            import json
+            payload = json.loads(request.body.decode('utf-8') or '{}')
+        except Exception:
+            payload = {}
+        if 'post_with_real_name' in payload:
+            request.user.post_with_real_name = bool(payload.get('post_with_real_name'))
+            request.user.save()
+            user_data['post_with_real_name'] = bool(request.user.post_with_real_name)
+            return JsonResponse({'user': user_data})
+
+    return JsonResponse({"stats": stats, 'user': user_data})
 
 # ============================================================================
 # VIEWS: REGISTRATION & EMAIL VERIFICATION
@@ -305,7 +333,26 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
-        _feed = self.request.query_params.get('feed')
+        # If filtering by circle, enforce membership visibility: non-members (and non-staff)
+        # should not see posts from private circles.
+        circle_id = self.request.query_params.get('circle')
+        if circle_id:
+            try:
+                circle_id_int = int(circle_id)
+            except Exception:
+                return queryset.none()
+            queryset = queryset.filter(circle_id=circle_id_int)
+            user = getattr(self.request, 'user', None)
+            # Staff can always see
+            if user and getattr(user, 'is_staff', False):
+                return queryset
+            # If user is not authenticated or not a member, return empty queryset
+            if not user or not getattr(user, 'is_authenticated', False):
+                return queryset.none()
+            from core.models import CircleMembership
+            is_member = CircleMembership.objects.filter(circle_id=circle_id_int, user=user).exists()
+            if not is_member:
+                return queryset.none()
         return queryset
 
     def get_serializer_context(self):
@@ -337,18 +384,33 @@ class PostViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         data = request.data.copy()
-        data['post'] = post.id
-        data['user'] = user.id
+        # If client didn't provide is_anonymous, default to the inverse of user's preference
+        if 'is_anonymous' not in data:
+            data['is_anonymous'] = not bool(getattr(user, 'post_with_real_name', False))
+        # We no longer inject `post` into the incoming data; instead we attach it on save.
         serializer = CommentSerializer(data=data, context={'request': request})
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(user=user, post=post)
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
             raise PermissionError('Authentication required')
-        serializer.save(user=self.request.user)
+        # Determine anonymity: prefer explicit client value; otherwise default to
+        # user's profile preference (post_with_real_name).
+        user = self.request.user
+        is_anonymous = serializer.validated_data.get('is_anonymous', None)
+        if is_anonymous is None:
+            is_anonymous = not bool(getattr(user, 'post_with_real_name', False))
+        # If posting to a circle, require membership (unless staff)
+        circle = serializer.validated_data.get('circle')
+        if circle is not None and not user.is_staff:
+            from core.models import CircleMembership
+            if not CircleMembership.objects.filter(circle=circle, user=user).exists():
+                raise PermissionDenied('Must be a member of the circle to post')
+
+        serializer.save(user=user, is_anonymous=is_anonymous)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()

@@ -1,5 +1,6 @@
 # core/views.py - Merged: Personal profile + Posts API
 from django.shortcuts import render
+import logging, traceback
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.conf import settings
@@ -9,7 +10,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.db.models import Count
 
-from .models import Post, Like, Comment
+from .models import Post, Like, Comment, CircleMembership
+from django.db.models import Q
 from .serializers import PostSerializer, CommentSerializer
 
 # Personal Profile Feature
@@ -53,7 +55,37 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
-        feed = self.request.query_params.get('feed', None)
+
+        # Circle-specific filter (frontend may pass ?circle=<id>)
+        circle_id = self.request.query_params.get('circle', None)
+        user = getattr(self.request, 'user', None)
+
+        if circle_id:
+            # If a circle is requested, only return posts in that circle.
+            # Enforce membership: only members (or staff) can view circle posts.
+            try:
+                cid = int(circle_id)
+            except (TypeError, ValueError):
+                return queryset.none()
+            # quick membership check
+            if user and getattr(user, 'is_authenticated', False):
+                is_member = CircleMembership.objects.filter(user=user, circle_id=cid).exists()
+                if user.is_staff or is_member:
+                    return queryset.filter(circle__id=cid)
+                else:
+                    return queryset.none()
+            # anonymous users cannot view circle posts
+            return queryset.none()
+
+        # No circle specified: enforce membership visibility
+        # - Authenticated users: show posts with no circle OR posts in circles they belong to
+        # - Anonymous users: only show posts with no circle
+        if user and getattr(user, 'is_authenticated', False):
+            member_circle_ids = CircleMembership.objects.filter(user=user).values_list('circle_id', flat=True)
+            queryset = queryset.filter(Q(circle__isnull=True) | Q(circle__in=member_circle_ids))
+        else:
+            queryset = queryset.filter(circle__isnull=True)
+
         return queryset
 
     def get_serializer_context(self):
@@ -85,16 +117,47 @@ class PostViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         data = request.data.copy()
-        data['post'] = post.id
-        data['user'] = user.id
+        # Default anonymity: if user prefers real-name posts (post_with_real_name=True) then anonymous=False
+        if 'is_anonymous' not in data:
+            data['is_anonymous'] = not bool(getattr(user, 'post_with_real_name', False))
         serializer = CommentSerializer(data=data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        try:
+            if serializer.is_valid():
+                serializer.save(user=user, post=post)
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+        except Exception as exc:
+            logging.error("Comment creation failed: %s", exc)
+            logging.error(traceback.format_exc())
+            return Response({
+                'detail': 'Server error creating comment',
+                'exception': str(exc),
+                'trace': traceback.format_exc().splitlines()[-5:]
+            }, status=500)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        # Enforce circle membership: if the incoming data includes a circle id,
+        # ensure the requesting user is a member of that circle (or staff).
+        user = self.request.user
+        circle = None
+        # serializer.validated_data is available because DRF validates before calling perform_create
+        if hasattr(serializer, 'validated_data') and serializer.validated_data:
+            circle = serializer.validated_data.get('circle')
+
+        # Save if no circle or membership is valid
+        if circle is None:
+            serializer.save(user=user)
+            return
+
+        # circle is an instance; check membership
+        from .models import CircleMembership
+        if user.is_staff or CircleMembership.objects.filter(user=user, circle=circle).exists():
+            serializer.save(user=user)
+            return
+
+        # Not a member => forbid
+        from rest_framework.exceptions import PermissionDenied
+        raise PermissionDenied('You must join the circle before posting to it')
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
