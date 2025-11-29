@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from backend.core.views import PostViewSet
-from .auth_views import login_view, get_csrf_token, me_view, debug_cookies_view, health_view
+from .auth_views import login_view, get_csrf_token, me_view, debug_cookies_view, health_view, register_view
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import status
@@ -169,6 +169,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),  # Adds login/logout URLs
     path('api/auth/csrf/', get_csrf_token, name='csrf-token'),
     path('api/auth/login/', login_view, name='login'),
+    path('api/auth/register/', register_view, name='register'),
     path('api/auth/me/', me_view, name='auth-me'),
     path('api/auth/debug-cookies/', debug_cookies_view, name='auth-debug-cookies'),
     path('api/auth/health/', health_view, name='auth-health'),

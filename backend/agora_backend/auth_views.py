@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login
+from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -34,6 +35,43 @@ def login_view(request):
         })
     else:
         return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def register_view(request):
+    """Create a new user account.
+
+    Request JSON:
+      { "username": str, "password": str, "bio"?: str, "avatar"?: str,
+        "program"?: str, "grade"?: str }
+
+    Returns 201 with basic user info on success.
+    """
+    User = get_user_model()
+    username = (request.data.get('username') or '').strip()
+    password = request.data.get('password') or ''
+    if not username or not password:
+        return Response({'detail': 'Username and password required'}, status=400)
+    if User.objects.filter(username=username).exists():
+        return Response({'detail': 'Username already taken'}, status=409)
+
+    # Optional profile fields
+    fields = {}
+    for key in ['bio', 'avatar', 'program', 'grade']:
+        val = request.data.get(key)
+        if isinstance(val, str):
+            fields[key] = val.strip()
+
+    user = User.objects.create_user(username=username, password=password, **fields)
+    # Optionally auto-login new user for smoother UX
+    login(request, user)
+    token = get_token(request)
+    return Response({
+        'detail': 'Registration successful',
+        'user': {'id': user.id, 'username': user.username},
+        'csrfToken': token,
+    }, status=201)
 
 
 @api_view(['GET'])

@@ -9,6 +9,8 @@ import axios from 'axios';
 import CirclesPanel from './components/CirclesPanel';
 import BackButton from './components/BackButton';
 import AuthDebug from './components/AuthDebug';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import Signup from './components/Signup';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -53,6 +55,7 @@ function App() {
   }
 
   return (
+    <Router>
     <div className="min-h-screen bg-gray-100">
       <div className="agora-header">
         <div className="agora-header-content" style={{ justifyContent: 'center' }}>
@@ -74,6 +77,11 @@ function App() {
           </div>
         </div>
       </div>
+      <header>
+        <nav>
+          <Link to="/signup">Sign Up</Link>
+        </nav>
+      </header>
   {showLogin && !isAuthed && (
     <div style={{ maxWidth: 440, margin: '1rem auto' }}>
       <Login onLogin={() => {
@@ -102,6 +110,7 @@ function App() {
       />
       <AuthDebug />
     </div>
+    </Router>
   );
 }
 

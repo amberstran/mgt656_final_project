@@ -69,6 +69,12 @@ export const loginUserWithCsrf = async (credentials) => {
   await ensureCsrf();
   return API.post('auth/login/', credentials);
 };
+export const register = async (data) => {
+  // data: { username, password, bio?, avatar?, program?, grade? }
+  await ensureCsrf();
+  const res = await API.post('auth/register/', data);
+  return res.data;
+};
 // fetchPosts supports pagination: page (1-based) and optional page_size
 export const fetchPosts = (type, page = 1, page_size = 10, circleId = null) => {
   let url = `posts/?feed=${type}&page=${page}&page_size=${page_size}`;
