@@ -156,3 +156,9 @@ CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if 
 # Allow all origins in development if DEBUG is True (for testing)
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
+
+# Session cookie settings for production (cross-origin authentication)
+SESSION_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
+SESSION_COOKIE_SECURE = not DEBUG  # Require HTTPS in production
+SESSION_COOKIE_HTTPONLY = True  # Prevent JavaScript access to session cookie
+SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN', None)  # Set to your domain in production
