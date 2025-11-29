@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
-    'core.apps.CoreConfig',
+    'backend.core.apps.CoreConfig',
 
     # Yale CAS (NetID Login)
     'django_cas_ng',
