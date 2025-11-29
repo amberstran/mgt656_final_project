@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from core.views import PostViewSet
-from .auth_views import login_view, get_csrf_token, me_view, debug_cookies_view
+from .auth_views import login_view, get_csrf_token, me_view, debug_cookies_view, health_view
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import status
@@ -171,6 +171,7 @@ urlpatterns = [
     path('api/auth/login/', login_view, name='login'),
     path('api/auth/me/', me_view, name='auth-me'),
     path('api/auth/debug-cookies/', debug_cookies_view, name='auth-debug-cookies'),
+    path('api/auth/health/', health_view, name='auth-health'),
     path('api/users/<int:user_id>/', users_view, name='user-detail'),
     path('api/circles/', circles_view, name='circles-list'),
     path('api/circles/<int:circle_id>/join/', circles_view, name='circle-join'),

@@ -53,6 +53,22 @@ API.interceptors.request.use(
 );
 
 export const loginUser = (credentials) => API.post('auth/login/', credentials);
+// Ensure CSRF cookie exists in production before mutating requests
+export const ensureCsrf = async () => {
+  try {
+    const csrftoken = getCookie('csrftoken');
+    if (!csrftoken) {
+      await API.get('auth/csrf/');
+    }
+  } catch (e) {
+    // Non-fatal: CSRF endpoint should be accessible cross-origin
+    console.warn('Unable to prefetch CSRF token', e);
+  }
+};
+export const loginUserWithCsrf = async (credentials) => {
+  await ensureCsrf();
+  return API.post('auth/login/', credentials);
+};
 // fetchPosts supports pagination: page (1-based) and optional page_size
 export const fetchPosts = (type, page = 1, page_size = 10, circleId = null) => {
   let url = `posts/?feed=${type}&page=${page}&page_size=${page_size}`;

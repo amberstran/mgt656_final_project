@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { ensureCsrf } from './api';
 import { API } from './api';
 
 // Ensure we request a CSRF token from the backend on app start so the
@@ -44,6 +45,9 @@ async function init() {
   // to log results (for example: reportWebVitals(console.log))
   // or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
   reportWebVitals();
+
+  // Prefetch CSRF cookie on app boot to ensure cross-site mutations work
+  ensureCsrf();
 }
 
 init();

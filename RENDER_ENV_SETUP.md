@@ -56,9 +56,9 @@ After deployment, you'll see URLs like:
 3. Add/Update these variables:
 
 ```
-ALLOWED_HOSTS=agora-backend-xxxx.onrender.com
-CORS_ALLOWED_ORIGINS=https://agora-frontend-xxxx.onrender.com
-CSRF_TRUSTED_ORIGINS=https://agora-frontend-xxxx.onrender.com
+ALLOWED_HOSTS=agora-backend-vavf.onrender.com
+CORS_ALLOWED_ORIGINS=https://agora-frontend-16kz.onrender.com
+CSRF_TRUSTED_ORIGINS=https://agora-frontend-16kz.onrender.com
 ```
 
 4. Click **Save Changes**
@@ -71,7 +71,7 @@ CSRF_TRUSTED_ORIGINS=https://agora-frontend-xxxx.onrender.com
 3. Add this variable:
 
 ```
-REACT_APP_API_URL=https://agora-backend-xxxx.onrender.com
+REACT_APP_API_URL=https://agora-backend-vavf.onrender.com
 ```
 
 4. Click **Save Changes**
@@ -82,6 +82,7 @@ REACT_APP_API_URL=https://agora-backend-xxxx.onrender.com
 1. Check backend logs - should show no CORS errors
 2. Check frontend - should be able to load posts
 3. Test in browser console - check Network tab for API calls
+4. Visit `https://agora-backend-vavf.onrender.com/api/auth/health/` to verify cookie flags and trusted origins
 
 ## Common Issues
 
@@ -95,6 +96,7 @@ REACT_APP_API_URL=https://agora-backend-xxxx.onrender.com
 3. Verify `REACT_APP_API_URL` in frontend matches backend URL exactly
 4. Make sure all URLs use `https://` not `http://`
 5. Redeploy both services after setting variables
+ 6. Ensure backend `ALLOWED_HOSTS` includes the exact backend hostname (e.g., `agora-backend-vavf.onrender.com`); missing host causes immediate 400 (DisallowedHost)
 
 ### CORS Error in Browser Console
 

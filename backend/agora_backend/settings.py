@@ -18,7 +18,7 @@ SECRET_KEY = os.getenv("SECRET_KEY") or 'django-insecure-dev-placeholder'
 # Default DEBUG to True for local development when environment var is not set.
 DEBUG = os.getenv("DEBUG", "True") == "True"
 # Allow localhost by default for local development. Can be overridden via env var.
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,.onrender.com").split(",")
 
 
 # Application definition
@@ -56,6 +56,7 @@ MIDDLEWARE = [
 CSRF_COOKIE_SECURE = not DEBUG  # Only send CSRF cookie over HTTPS in production
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read CSRF cookie
 CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
 
 # CORS settings
 CORS_ALLOW_CREDENTIALS = True
@@ -146,11 +147,17 @@ LOGOUT_REDIRECT_URL = '/profile/'
 
 # CORS settings - support both local and production
 # Strip whitespace and filter out empty strings
-cors_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://10.0.0.111:3000")
+cors_origins = os.getenv(
+    "CORS_ALLOWED_ORIGINS",
+    "http://localhost:3000,http://10.0.0.111:3000,https://*.onrender.com"
+)
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
 
 # CSRF settings - support both local and production
-csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS", "http://localhost:3000,http://10.0.0.111:3000")
+csrf_origins = os.getenv(
+    "CSRF_TRUSTED_ORIGINS",
+    "http://localhost:3000,http://10.0.0.111:3000,https://*.onrender.com"
+)
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # Allow all origins in development if DEBUG is True (for testing)

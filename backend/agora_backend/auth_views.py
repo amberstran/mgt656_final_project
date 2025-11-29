@@ -4,6 +4,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework import status
+from django.conf import settings
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -63,5 +64,26 @@ def debug_cookies_view(request):
         'authenticated': bool(user and getattr(user, 'is_authenticated', False)),
         'cookie_keys': list(request.COOKIES.keys()),
         'cookies': {k: ('<hidden>' if k.lower() == 'sessionid' else v) for k, v in request.COOKIES.items()},
+    })
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def health_view(request):
+    """Health endpoint to verify env + cookie flags in production.
+
+    Returns key settings related to cross-origin auth and CSRF, and whether
+    the request is secure. Does not expose secrets.
+    """
+    return Response({
+        'debug': settings.DEBUG,
+        'allowed_hosts': settings.ALLOWED_HOSTS,
+        'cors_allowed_origins': getattr(settings, 'CORS_ALLOWED_ORIGINS', []),
+        'csrf_trusted_origins': getattr(settings, 'CSRF_TRUSTED_ORIGINS', []),
+        'session_cookie_samesite': getattr(settings, 'SESSION_COOKIE_SAMESITE', None),
+        'session_cookie_secure': getattr(settings, 'SESSION_COOKIE_SECURE', None),
+        'csrf_cookie_samesite': getattr(settings, 'CSRF_COOKIE_SAMESITE', None),
+        'csrf_cookie_secure': getattr(settings, 'CSRF_COOKIE_SECURE', None),
+        'request_secure': request.is_secure(),
     })
 
