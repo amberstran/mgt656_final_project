@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 
 # === Middleware ===
 MIDDLEWARE = [
+    'agora_backend.middleware.ExceptionLoggingMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
