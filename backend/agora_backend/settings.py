@@ -158,7 +158,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # === Custom User Model ===
-AUTH_USER_MODEL = "backend.core.CustomUser"
+AUTH_USER_MODEL = "core.CustomUser"
 
 # Auth redirects
 LOGIN_URL = '/accounts/login/'
