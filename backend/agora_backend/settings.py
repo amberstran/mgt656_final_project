@@ -15,10 +15,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
 SECRET_KEY = os.getenv("SECRET_KEY") or 'django-insecure-dev-placeholder'
-# Default DEBUG to True for local development when environment var is not set.
-DEBUG = os.getenv("DEBUG", "True") == "True"
-# Allow localhost by default for local development. Can be overridden via env var.
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,.onrender.com").split(",")
+# Robust DEBUG parsing: treat any case-insensitive 'true' as True
+DEBUG = os.getenv("DEBUG", "True").strip().lower() == "true"
+# Parse and strip ALLOWED_HOSTS; ignore empties and whitespace-only entries
+_raw_allowed_hosts = os.getenv(
+    "ALLOWED_HOSTS",
+    "agora-backend-vavf.onrender.com,127.0.0.1,localhost,.onrender.com"
+)
+ALLOWED_HOSTS = [h.strip() for h in _raw_allowed_hosts.split(',') if h.strip()]
+if DEBUG and not ALLOWED_HOSTS:
+    ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+# Allow explicit wildcard override for troubleshooting (DO NOT use long-term)
+if os.getenv("ALLOW_ALL_HOSTS", "False").strip().lower() == "true":
+    ALLOWED_HOSTS = ["*"]
+
+print(f"[startup] DEBUG={DEBUG} ALLOWED_HOSTS={ALLOWED_HOSTS}")
 
 
 # Application definition
