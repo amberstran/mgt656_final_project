@@ -31,6 +31,13 @@ if os.getenv("ALLOW_ALL_HOSTS", "False").strip().lower() == "true":
     ALLOWED_HOSTS = ["*"]
 
 print(f"[startup] DEBUG={DEBUG} ALLOWED_HOSTS={ALLOWED_HOSTS}")
+# Auto-append Render external URL host if missing (helps avoid DisallowedHost when env var mis-set)
+_render_external = os.getenv("RENDER_EXTERNAL_URL")
+if _render_external:
+    _render_host = _render_external.split('://')[-1].strip('/')
+    if _render_host and _render_host not in ALLOWED_HOSTS and '*' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(_render_host)
+        print(f"[startup] Added render host '{_render_host}' to ALLOWED_HOSTS -> {ALLOWED_HOSTS}")
 
 
 # Application definition
