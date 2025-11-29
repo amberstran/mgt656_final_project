@@ -10,7 +10,11 @@ services:
       python manage.py collectstatic --noinput && 
       (python manage.py createsuperuser --noinput || echo "Superuser already exists") && 
       (python manage.py seed_demo_users || echo "Demo user not seeded")
-    startCommand: cd backend && PYTHONPATH=/opt/render/project/src:$PYTHONPATH gunicorn agora_backend.wsgi:application --bind 0.0.0.0:$PORT
+    startCommand: >-
+      cd backend && 
+      python manage.py migrate && 
+      PYTHONPATH=/opt/render/project/src:$PYTHONPATH \
+      gunicorn agora_backend.wsgi:application --bind 0.0.0.0:$PORT
     # This will be deployed as a separate web service that runs continuously
     envVars:
       - key: PYTHON_VERSION
