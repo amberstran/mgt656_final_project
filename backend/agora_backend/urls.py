@@ -6,12 +6,12 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from core.views import PostViewSet
+from backend.core.views import PostViewSet
 from .auth_views import login_view, get_csrf_token, me_view, debug_cookies_view, health_view
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import status
-from core.models import Report, Post, Comment
+from backend.core.models import Report, Post, Comment
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -119,7 +119,7 @@ def circles_view(request, circle_id=None):
     Returns minimal JSON that the frontend expects (id, name, description,
     is_member flag and member_count).
     """
-    from core.models import Circle, CircleMembership
+    from backend.core.models import Circle, CircleMembership
 
     # LIST: /api/circles/
     if request.method == 'GET' and circle_id is None:
@@ -182,7 +182,7 @@ urlpatterns = [
     path('api/reports/<int:report_id>/action/', reports_admin_view, name='report-action'),
     path('api/', include(router.urls)),
     path('', redirect_root_to_profile, name='root'),
-    path('', include('core.urls')),  # Your profile and other core routes
+    path('', include('backend.core.urls')),  # Your profile and other core routes
 ]
 
 if settings.DEBUG:
