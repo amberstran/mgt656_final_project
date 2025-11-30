@@ -7,7 +7,7 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):
     """Custom user model for Agora"""
     # Yale-specific fields
-    netid = models.CharField(max_length=50, unique=True)
+    netid = models.CharField(max_length=50, unique=True, blank=True, default='')
     display_name = models.CharField(max_length=100, default='')
     school = models.CharField(max_length=100, default='')
     year = models.CharField(max_length=10, default='')
