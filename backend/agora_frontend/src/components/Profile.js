@@ -130,12 +130,35 @@ export default function Profile() {
         <button 
           className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
           onClick={() => setActiveTab('posts')}
+          style={{
+            background: activeTab === 'posts' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#f5f5f5',
+            color: activeTab === 'posts' ? 'white' : '#222',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            fontWeight: 600,
+            fontSize: '1rem',
+            padding: '0.75rem 1.5rem',
+            marginRight: '8px',
+            cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s'
+          }}
         >
           My Posts ({posts.length})
         </button>
         <button 
           className={`tab ${activeTab === 'messages' ? 'active' : ''}`}
           onClick={() => setActiveTab('messages')}
+          style={{
+            background: activeTab === 'messages' ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' : '#f5f5f5',
+            color: activeTab === 'messages' ? 'white' : '#222',
+            border: 'none',
+            borderRadius: '8px 8px 0 0',
+            fontWeight: 600,
+            fontSize: '1rem',
+            padding: '0.75rem 1.5rem',
+            cursor: 'pointer',
+            transition: 'background 0.2s, color 0.2s'
+          }}
         >
           Circle Messages
         </button>
@@ -148,7 +171,18 @@ export default function Profile() {
             {posts.length === 0 ? (
               <div className="empty-state">
                 <p>You haven't created any posts yet.</p>
-                <button onClick={() => window.location.href = '/'}>Create your first post</button>
+                <button onClick={() => window.location.href = '/'} style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  padding: '0.75rem 1.5rem',
+                  marginTop: '12px',
+                  cursor: 'pointer',
+                  transition: 'background 0.2s, color 0.2s'
+                }}>Create your first post</button>
               </div>
             ) : (
               <div className="posts-list">

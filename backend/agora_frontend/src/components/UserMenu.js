@@ -111,20 +111,23 @@ const UserMenu = ({ username, onLogout }) => {
                 width: '100%',
                 padding: '0.75rem 1rem',
                 border: 'none',
-                background: 'white',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white',
                 textAlign: 'left',
                 cursor: 'pointer',
                 fontSize: '0.9rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '0.5rem',
-                transition: 'background 0.2s',
+                transition: 'background 0.2s, color 0.2s',
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = '#f5f5f5';
+                e.currentTarget.style.background = '#5568d3';
+                e.currentTarget.style.color = 'white';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'white';
+                e.currentTarget.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                e.currentTarget.style.color = 'white';
               }}
             >
               <span>👤</span>
