@@ -9,13 +9,17 @@ import axios from 'axios';
 import CirclesPanel from './components/CirclesPanel';
 import BackButton from './components/BackButton';
 import AuthDebug from './components/AuthDebug';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Signup from './components/Signup';
+import Profile from './components/Profile';
+import UserMenu from './components/UserMenu';
 
-function App() {
+function AppContent() {
+  const navigate = useNavigate();
   const [showLogin, setShowLogin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [showLanding, setShowLanding] = useState(true);
   const [feedType, setFeedType] = useState('new');
   const [showCreate, setShowCreate] = useState(false);
@@ -32,9 +36,11 @@ function App() {
       .then(r => {
         if (r.data?.authenticated) {
           setIsAuthed(true);
+          setCurrentUser(r.data.user);
           setShowLogin(false);
         } else {
           setIsAuthed(false);
+          setCurrentUser(null);
           setShowLogin(true); // auto prompt login
         }
       })
@@ -55,61 +61,100 @@ function App() {
   }
 
   return (
-    <Router>
     <div className="min-h-screen bg-gray-100">
-      <div className="agora-header">
-        <div className="agora-header-content" style={{ justifyContent: 'center' }}>
-          <div style={{ position: 'absolute', left: '1rem' }}>
-            <BackButton />
-          </div>
-          <div className="yale-logo-text">YALE</div>
-          <h1 className="text-4xl font-bold text-white text-center drop-shadow" style={{ margin: '0 2rem' }}>Agora</h1>
-          <div className="bg-white/20 rounded-lg p-1 flex text-white text-sm">
-            {['new','top'].map((t) => (
-              <button
-                key={t}
-                onClick={() => setFeedType(t)}
-                className={`px-3 py-1 rounded-md transition-colors ${feedType === t ? 'bg-white text-blue-700' : 'text-white/90 hover:bg-white/10'}`}
-              >
-                {t === 'new' ? 'Latest' : 'Hot'}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-      <header>
-        <nav>
-          <Link to="/signup">Sign Up</Link>
-        </nav>
-      </header>
-  {showLogin && !isAuthed && (
-    <div style={{ maxWidth: 440, margin: '1rem auto' }}>
-      <Login onLogin={() => {
-        // After login, re-check auth
-        const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-        axios.get(`${apiUrl}/api/auth/me/`, { withCredentials: true })
-          .then(r => {
-            if (r.data?.authenticated) {
-              setIsAuthed(true);
-              setShowLogin(false);
-            }
-          });
-      }} />
+      <Routes>
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/" element={
+          <>
+            <div className="agora-header">
+              <div className="agora-header-content" style={{ justifyContent: 'center' }}>
+                <div style={{ position: 'absolute', left: '1rem' }}>
+                  <BackButton />
+                </div>
+                <div className="yale-logo-text">YALE</div>
+                <h1 className="text-4xl font-bold text-white text-center drop-shadow" style={{ margin: '0 2rem' }}>Agora</h1>
+                <div className="bg-white/20 rounded-lg p-1 flex text-white text-sm">
+                  {['new','top'].map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setFeedType(t)}
+                      className={`px-3 py-1 rounded-md transition-colors ${feedType === t ? 'bg-white text-blue-700' : 'text-white/90 hover:bg-white/10'}`}
+                    >
+                      {t === 'new' ? 'Latest' : 'Hot'}
+                    </button>
+                  ))}
+                </div>
+                {isAuthed && currentUser && (
+                  <div style={{ position: 'absolute', right: '1rem' }}>
+                    <UserMenu 
+                      username={currentUser.username} 
+                      onLogout={() => {
+                        setIsAuthed(false);
+                        setCurrentUser(null);
+                        setShowLogin(true);
+                      }} 
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+            {showLogin && !isAuthed && (
+              <div style={{ maxWidth: 440, margin: '1rem auto' }}>
+                <Login onLogin={() => {
+                  // After login, re-check auth
+                  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+                  axios.get(`${apiUrl}/api/auth/me/`, { withCredentials: true })
+                    .then(r => {
+                      if (r.data?.authenticated) {
+                        setIsAuthed(true);
+                        setShowLogin(false);
+                      }
+                    });
+                }} />
+                <p style={{ 
+                  marginTop: '1rem', 
+                  fontSize: '0.875rem', 
+                  color: '#666', 
+                  textAlign: 'center' 
+                }}>
+                  Don't have an account?{' '}
+                  <Link 
+                    to="/signup" 
+                    style={{ 
+                      color: '#667eea', 
+                      fontWeight: '600', 
+                      textDecoration: 'none' 
+                    }}
+                  >
+                    Sign up here
+                  </Link>
+                </p>
+              </div>
+            )}
+            <CirclesPanel selectedCircleId={selectedCircle} onSelect={setSelectedCircle} />
+            <PostsList feedType={feedType} reloadSignal={reloadSignal} circleId={selectedCircle} />
+            <BottomNav
+              onCreate={() => setShowCreate(true)}
+              onProfile={() => navigate('/profile')}
+            />
+            <CreatePostModal
+              open={showCreate}
+              onClose={() => setShowCreate(false)}
+              onCreated={() => setReloadSignal((s) => s + 1)}
+            />
+            <AuthDebug />
+          </>
+        } />
+      </Routes>
     </div>
-  )}
-  <CirclesPanel selectedCircleId={selectedCircle} onSelect={setSelectedCircle} />
-  <PostsList feedType={feedType} reloadSignal={reloadSignal} circleId={selectedCircle} />
-      <BottomNav
-        onCreate={() => setShowCreate(true)}
-        onProfile={() => { window.location.href = '/profile/'; }}
-      />
-      <CreatePostModal
-        open={showCreate}
-        onClose={() => setShowCreate(false)}
-        onCreated={() => setReloadSignal((s) => s + 1)}
-      />
-      <AuthDebug />
-    </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 }

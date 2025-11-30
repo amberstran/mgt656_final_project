@@ -32,7 +32,7 @@ const BottomNav = ({ onCreate, onProfile }) => {
       </button>
       <button
         aria-label="Personal profile"
-        onClick={() => window.location.href = 'http://127.0.0.1:8000/profile/'}
+        onClick={onProfile}
         style={{ fontSize: '1.75rem' }}
       >
         👤

@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth import get_user_model
 from django.middleware.csrf import get_token
 from rest_framework.decorators import api_view, permission_classes
@@ -38,6 +38,13 @@ def login_view(request):
 
 
 @api_view(['POST'])
+def logout_view(request):
+    """Log out the current user by ending their session."""
+    logout(request)
+    return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
 @permission_classes([AllowAny])
 def register_view(request):
     """Create a new user account.
@@ -62,6 +69,15 @@ def register_view(request):
         val = request.data.get(key)
         if isinstance(val, str):
             fields[key] = val.strip()
+    
+    # Provide defaults for database fields that might be required but not in model
+    fields.setdefault('netid', username)  # Use username as netid if not provided
+    fields.setdefault('display_name', username)  # Use username as display_name
+    fields.setdefault('school', 'Yale University')  # Default school
+    fields.setdefault('year', '')  # Empty string for year
+    fields.setdefault('is_verified', False)  # Not verified by default
+    fields.setdefault('program', '')  # Empty string if not provided
+    fields.setdefault('grade', '')  # Empty string if not provided
 
     user = User.objects.create_user(username=username, password=password, **fields)
     # Optionally auto-login new user for smoother UX

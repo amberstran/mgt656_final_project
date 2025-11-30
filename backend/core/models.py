@@ -6,6 +6,14 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
     """Custom user model for Agora"""
+    # Yale-specific fields
+    netid = models.CharField(max_length=50, unique=True)
+    display_name = models.CharField(max_length=100, default='')
+    school = models.CharField(max_length=100, default='')
+    year = models.CharField(max_length=10, default='')
+    is_verified = models.BooleanField(default=False)
+    
+    # Profile fields
     bio = models.TextField(blank=True)
     avatar = models.URLField(blank=True)
     program = models.CharField(max_length=100, blank=True, verbose_name="Major/Program")

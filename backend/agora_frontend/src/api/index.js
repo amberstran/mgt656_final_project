@@ -53,6 +53,7 @@ API.interceptors.request.use(
 );
 
 export const loginUser = (credentials) => API.post('auth/login/', credentials);
+export const logoutUser = () => API.post('auth/logout/', {});
 // Ensure CSRF cookie exists in production before mutating requests
 export const ensureCsrf = async () => {
   try {
