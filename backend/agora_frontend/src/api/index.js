@@ -59,11 +59,19 @@ export const ensureCsrf = async () => {
   try {
     const csrftoken = getCookie('csrftoken');
     if (!csrftoken) {
-      await API.get('auth/csrf/');
+      // Explicitly fetch CSRF token with credentials
+      const response = await API.get('auth/csrf/');
+      // Wait a bit for cookie to be set
+      await new Promise(resolve => setTimeout(resolve, 100));
+      const newToken = getCookie('csrftoken');
+      if (!newToken) {
+        console.warn('CSRF token not set after fetching. This may cause issues.');
+      }
     }
   } catch (e) {
     // Non-fatal: CSRF endpoint should be accessible cross-origin
-    console.warn('Unable to prefetch CSRF token', e);
+    console.error('Unable to prefetch CSRF token', e);
+    throw e; // Re-throw so calling code knows there's an issue
   }
 };
 export const loginUserWithCsrf = async (credentials) => {

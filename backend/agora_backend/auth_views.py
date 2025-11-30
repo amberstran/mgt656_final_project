@@ -10,9 +10,25 @@ from django.conf import settings
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_csrf_token(request):
-    """Get CSRF token for the frontend"""
+    """Get CSRF token for the frontend
+    
+    This endpoint ensures the CSRF cookie is set and returns the token value.
+    The get_token() call will set the cookie if it doesn't exist.
+    """
     token = get_token(request)
-    return Response({'csrfToken': token})
+    response = Response({'csrfToken': token})
+    # Explicitly ensure the cookie is set with proper attributes
+    if not request.COOKIES.get('csrftoken'):
+        from django.middleware.csrf import _get_new_csrf_token
+        response.set_cookie(
+            'csrftoken',
+            token,
+            max_age=31449600,  # 1 year
+            secure=not settings.DEBUG,  # HTTPS only in production
+            httponly=False,  # Must be False so JavaScript can read it
+            samesite='None' if not settings.DEBUG else 'Lax',
+        )
+    return response
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
