@@ -7,7 +7,6 @@ import BottomNav from './components/BottomNav';
 import CreatePostModal from './components/CreatePostModal';
 import axios from 'axios';
 import CirclesPanel from './components/CirclesPanel';
-import BackButton from './components/BackButton';
 import AuthDebug from './components/AuthDebug';
 import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import Signup from './components/Signup';
@@ -69,9 +68,6 @@ function AppContent() {
           <>
             <div className="agora-header">
               <div className="agora-header-content" style={{ justifyContent: 'center' }}>
-                <div style={{ position: 'absolute', left: '1rem' }}>
-                  <BackButton />
-                </div>
                 <div className="yale-logo-text">YALE</div>
                 <h1 className="text-4xl font-bold text-white text-center drop-shadow" style={{ margin: '0 2rem' }}>Agora</h1>
                 <div className="bg-white/20 rounded-lg p-1 flex text-white text-sm">
