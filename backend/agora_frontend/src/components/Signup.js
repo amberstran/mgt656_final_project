@@ -36,36 +36,64 @@ export default function Signup() {
   };
 
   return (
-    <div className="signup-container" style={{ maxWidth: 480, margin: '1rem auto' }}>
-      <h2>Create Account</h2>
-      {error && <div className="error">{error}</div>}
-      <form onSubmit={onSubmit}>
-        <label>
-          Username
-          <input name="username" value={form.username} onChange={onChange} required />
-        </label>
-        <label>
-          Password
-          <input type="password" name="password" value={form.password} onChange={onChange} required />
-        </label>
-        <label>
-          Bio
-          <textarea name="bio" value={form.bio} onChange={onChange} />
-        </label>
-        <label>
-          Avatar URL
-          <input name="avatar" value={form.avatar} onChange={onChange} />
-        </label>
-        <label>
-          Program
-          <input name="program" value={form.program} onChange={onChange} />
-        </label>
-        <label>
-          Grade
-          <input name="grade" value={form.grade} onChange={onChange} />
-        </label>
-        <button type="submit" disabled={loading}>{loading ? 'Creating...' : 'Sign Up'}</button>
-      </form>
+    <div style={{
+      minHeight: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial"
+    }}>
+      <div style={{
+        maxWidth: '480px',
+        width: '100%',
+        background: '#fff',
+        padding: '40px',
+        borderRadius: '16px',
+        boxShadow: '0 10px 40px rgba(0,0,0,0.15)'
+      }}>
+        <h2 style={{
+          marginTop: 0,
+          color: '#222',
+          fontSize: '2rem',
+          marginBottom: '10px',
+          textAlign: 'center',
+          fontWeight: 700
+        }}>Create Account</h2>
+        <p style={{
+          color: '#666',
+          lineHeight: 1.5,
+          marginBottom: '24px',
+          textAlign: 'center'
+        }}>Sign up to join the Agora community</p>
+        {error && (
+          <div style={{
+            background: '#fee',
+            border: '1px solid #fcc',
+            color: '#c33',
+            padding: '0.75rem',
+            borderRadius: '8px',
+            fontSize: '0.875rem',
+            marginBottom: '1rem',
+            textAlign: 'center'
+          }}>{error}</div>
+        )}
+        <form onSubmit={onSubmit}>
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Username</label>
+          <input type="text" name="username" value={form.username} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} required disabled={loading} />
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Password</label>
+          <input type="password" name="password" value={form.password} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} required disabled={loading} />
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Bio</label>
+          <textarea name="bio" value={form.bio} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} rows={2} />
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Avatar URL</label>
+          <input type="url" name="avatar" value={form.avatar} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} />
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Program</label>
+          <input type="text" name="program" value={form.program} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} />
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Grade</label>
+          <input type="text" name="grade" value={form.grade} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} />
+          <button type="submit" disabled={loading} style={{width:'100%',background:'#667eea',color:'white',padding:'14px',borderRadius:'8px',fontWeight:600,fontSize:'1rem',border:'none',cursor:loading?'not-allowed':'pointer',marginTop:'24px',transition:'background 0.2s'}}>{loading ? 'Signing Up...' : 'Sign Up'}</button>
+        </form>
+      </div>
     </div>
   );
 }
