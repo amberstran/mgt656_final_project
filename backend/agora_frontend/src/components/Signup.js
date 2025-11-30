@@ -2,17 +2,36 @@ import React, { useState } from 'react';
 import { register } from '../api';
 
 export default function Signup() {
-  const [form, setForm] = useState({ username: '', password: '', bio: '', avatar: '', program: '', grade: '' });
+  const [form, setForm] = useState({
+    username: '',
+    password: '',
+    bio: '',
+    avatar: '',
+    program: '',
+    grade: '',
+    email: '' // Add email field
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const onChange = (e) => {
-    const { name, value } = e.target;
-    setForm((f) => ({ ...f, [name]: value }));
+    setForm({ ...form, [e.target.name]: e.target.value });
+    if (e.target.name === 'email') {
+      if (e.target.value && !e.target.value.endsWith('@yale.edu')) {
+        setEmailError('Please enter your Yale email address ending with @yale.edu');
+      } else {
+        setEmailError('');
+      }
+    }
   };
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (!form.email.endsWith('@yale.edu')) {
+      setEmailError('Please enter your Yale email address ending with @yale.edu');
+      return;
+    }
     setError('');
     setLoading(true);
     try {
@@ -23,6 +42,7 @@ export default function Signup() {
         avatar: form.avatar,
         program: form.program,
         grade: form.grade,
+        email: form.email // Include email in registration
       });
       // Redirect to home page after successful registration
       // The user is auto-logged in by the backend
@@ -79,6 +99,11 @@ export default function Signup() {
           }}>{error}</div>
         )}
         <form onSubmit={onSubmit}>
+          <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Email</label>
+          <input type="email" name="email" value={form.email} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} required disabled={loading} />
+          {emailError && (
+            <div style={{color:'#c33',fontSize:'0.95rem',marginBottom:'12px'}}>{emailError}</div>
+          )}
           <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Username</label>
           <input type="text" name="username" value={form.username} onChange={onChange} style={{width:'100%',padding:'12px',marginTop:'6px',borderRadius:'8px',border:'1px solid #ddd',fontSize:'15px',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}} required disabled={loading} />
           <label style={{fontWeight:600, color:'#222', fontSize:'14px', marginTop:'16px'}}>Password</label>
