@@ -24,7 +24,9 @@ export default function Signup() {
         program: form.program,
         grade: form.grade,
       });
-      window.location.href = '/profile';
+      // Redirect to home page after successful registration
+      // The user is auto-logged in by the backend
+      window.location.href = '/';
     } catch (err) {
       const msg = err?.response?.data?.detail || 'Failed to register';
       setError(msg);
