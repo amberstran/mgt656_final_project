@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchCircles, joinCircle, leaveCircle } from '../api';
+import { fetchCircles } from '../api';
 
 // Mock data for initial development
 const mockCircles = [
@@ -13,7 +13,6 @@ const CircleFeature = () => {
   const [circles, setCircles] = useState([]);
   const [selectedCircle, setSelectedCircle] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
   // Load circles on mount
   useEffect(() => {
@@ -22,7 +21,6 @@ const CircleFeature = () => {
 
   const loadCircles = async () => {
     setLoading(true);
-    setError('');
     try {
       const res = await fetchCircles();
       const payload = res.data;

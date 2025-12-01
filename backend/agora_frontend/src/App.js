@@ -3,7 +3,6 @@ import './App.css';
 import PostsList from './components/PostsList';
 import Login from './components/Login';
 import axios from 'axios';
-import CirclesList from './components/CirclesList';
 import CircleFeature from './components/CircleFeature';
 
 function App() {
