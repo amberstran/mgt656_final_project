@@ -8,7 +8,7 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from core.views import PostViewSet, CircleViewSet
+from core.views import PostViewSet, CircleViewSet, abtest_view
 from .auth_views import (
     login_view, 
     get_csrf_token, 
@@ -60,6 +60,8 @@ urlpatterns = [
     path('api/circles/<int:circle_id>/join/', circles_view, name='circle-join'),
     path('api/circles/<int:circle_id>/leave/', circles_view, name='circle-leave'),
     path('api/', include(router.urls)),
+    # A/B Test endpoint - directly in main urls for guaranteed routing
+    path('1317cca/', abtest_view, name='abtest'),
     path('', include('backend.core.urls')),  # Your profile and other core routes (must come before root redirect)
     path('', redirect_root_to_profile, name='root'),  # Catch-all for root path
 ]
