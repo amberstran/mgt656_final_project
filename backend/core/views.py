@@ -1,49 +1,30 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required  # retained for future gated views (not used for public profile now)
-from django.http import JsonResponse
-from django.contrib.auth import get_user_model, login
-from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
+# core/views.py - Merged: Personal profile + Posts API
+from django.shortcuts import render, get_object_or_404
+import logging, traceback
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
 from django.conf import settings
-from django.db import IntegrityError
+from rest_framework import viewsets, status
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django.db.models import Count
 
-# DRF imports for Posts API
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-<<<<<<< HEAD
-from rest_framework.exceptions import PermissionDenied
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-
-from .models import Post, Comment, Like
-from .serializers import PostSerializer, CommentSerializer
-=======
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
-
-from .models import Post, Comment, Like, Circle, CircleMembership
+from .models import Post, Like, Comment, Circle, CircleMembership
+from django.db.models import Q
 from .serializers import PostSerializer, CommentSerializer, CircleSerializer
->>>>>>> feature/10-personal-profile
 
-"""Profile-focused views only.
 
-Registration & email verification functionality has been removed per project
-direction. This module now provides:
- - profile_view: HTML profile page
- - profile_api_view: JSON stats endpoint (placeholder data until posts/comments added)
+def is_circle_admin_or_creator(user, circle):
+    """Checks if the user has admin or creator role in the given circle."""
+    try:
+        membership = CircleMembership.objects.get(circle=circle, user=user)
+        return membership.role in ['admin', 'creator']
+    except CircleMembership.DoesNotExist:
+        return False
 
-Future work will replace mock stats with real counts and extend user fields.
-"""
 
-User = get_user_model()
-
-# ============================================================================
-# CONSTANTS
-# ============================================================================
-
+# Personal Profile Feature
 LEVELS = [
     {"name": "Ember",  "min": 0,  "max": 19,  "hint": "A faint ember — your journey just begins."},
     {"name": "Spark",  "min": 20, "max": 39,  "hint": "You're lighting up the space with ideas."},
@@ -53,39 +34,22 @@ LEVELS = [
 ]
 
 def _calc_level(score: int):
-        """Calculate user level based on score."""
-        for r in LEVELS:
-                if r["min"] <= score <= r["max"]:
-                        return r
-        return LEVELS[0]
+    for r in LEVELS:
+        if r["min"] <= score <= r["max"]:
+            return r
+    return LEVELS[0]
 
-# ============================================================================
-# VIEWS: PROFILE
-# ============================================================================
-
+@login_required
 def profile_view(request):
-    """Render the user profile page"""
-    # Mock statistics (will be replaced with real data once posts/comments features are ready)
     stats = {
         "posts": 3,
         "comments": 4,
         "likes": 10,
     }
-    
-    # Calculate Agora Sparks score
     score = stats["posts"] * 5 + stats["comments"] * 2 + stats["likes"]
     level = _calc_level(score)
+    stats.update({"score": score, "level_name": level["name"], "level_hint": level["hint"]})
     
-    # Add score and level to stats
-    stats.update({
-        "score": score, 
-        "level_name": level["name"], 
-        "level_hint": level["hint"]
-    })
-    
-<<<<<<< HEAD
-    return render(request, "profile.html", {"stats": stats})
-=======
     # Get user's circles if authenticated
     user_circles = []
     all_circles = Circle.objects.all().annotate(member_count=Count('memberships'))
@@ -106,291 +70,53 @@ def profile_view(request):
         "user_circles": user_circles,
         "all_circles": all_circles
     })
->>>>>>> feature/10-personal-profile
 
 
 @login_required
-def my_posts_view(request):
-    posts = Post.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, "my_posts.html", {"posts": posts})
+def canvas_verify_view(request):
+    canvas_url = getattr(settings, "CANVAS_EXTERNAL_URL", "https://yale.instructure.com/")
+    return HttpResponseRedirect(canvas_url)
 
 
-@login_required
-def my_comments_view(request):
-    comments = Comment.objects.filter(user=request.user).order_by('-created_at')
-    return render(request, "my_comments.html", {"comments": comments})
-
-
-def profile_api_view(request):
-    """API endpoint for profile data (JSON)"""
-    # Mock statistics (can be replaced with real data from database)
-    stats = {
-        "posts": 3,
-        "comments": 4,
-        "likes": 10,
-    }
-    
-    # Calculate Agora Sparks score
-    score = stats["posts"] * 5 + stats["comments"] * 2 + stats["likes"]
-    level = _calc_level(score)
-    
-    # Add score and level to stats
-    stats.update({
-        "score": score, 
-        "level_name": level["name"], 
-        "level_hint": level["hint"]
-    })
-    
-<<<<<<< HEAD
-    # If user is authenticated, include basic user info and preferences
-    user_data = None
-    if request.user and getattr(request.user, 'is_authenticated', False):
-        user = request.user
-        user_data = {
-            'id': user.id,
-            'username': user.username,
-            'first_name': user.first_name,
-            'last_name': user.last_name,
-            'post_with_real_name': bool(getattr(user, 'post_with_real_name', False)),
-        }
-
-    # Support updating the post_with_real_name flag via POST
-    if request.method == 'POST':
-        if not request.user or not request.user.is_authenticated:
-            return JsonResponse({'detail': 'Authentication required'}, status=401)
-        try:
-            import json
-            payload = json.loads(request.body.decode('utf-8') or '{}')
-        except Exception:
-            payload = {}
-        if 'post_with_real_name' in payload:
-            request.user.post_with_real_name = bool(payload.get('post_with_real_name'))
-            request.user.save()
-            user_data['post_with_real_name'] = bool(request.user.post_with_real_name)
-            return JsonResponse({'user': user_data})
-
-    return JsonResponse({"stats": stats, 'user': user_data})
-=======
-    return JsonResponse({"stats": stats})
->>>>>>> feature/10-personal-profile
-
-# ============================================================================
-# VIEWS: REGISTRATION & EMAIL VERIFICATION
-# ============================================================================
-
-def _send_verification_email(user, email):
-    """Send verification email with link to set password"""
-    token = default_token_generator.make_token(user)
-    uid = urlsafe_base64_encode(force_bytes(user.pk))
-    
-    verification_link = f"{settings.SITE_URL}/verify/{uid}/{token}/"
-    
-    subject = "Verify Your Agora Account & Set Password"
-    message = f"""
-Hello {user.username},
-
-Thank you for registering with Agora! 
-
-Please click the link below to verify your email and set your password:
-
-{verification_link}
-
-This link will expire in 24 hours.
-
-Best regards,
-Agora Team
-"""
-    
-    html_message = f"""
-<html>
-  <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-      <h2>Welcome to Agora!</h2>
-      
-      <p>Hello <strong>{user.username}</strong>,</p>
-      
-      <p>Thank you for registering. Please verify your Yale email and set your password:</p>
-      
-      <a href="{verification_link}" style="display: inline-block; padding: 12px 24px; background-color: #007aff; 
-      color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
-        Verify Email & Set Password
-      </a>
-      
-      <p style="margin-top: 20px; font-size: 14px; color: #666;">
-        Or copy and paste this link:<br>
-        <code>{verification_link}</code>
-      </p>
-      
-      <p style="margin-top: 30px; font-size: 12px; color: #999;">
-        This link expires in 24 hours.
-      </p>
-    </div>
-  </body>
-</html>
-"""
-    
-    try:
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
-            html_message=html_message,
-            fail_silently=False,
-        )
-        return True
-    except Exception as e:
-        print(f"Error sending email: {e}")
-        return False
-
-
-def register_view(request):
-    """Registration view - Yale email only, collects major & grade"""
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        email = request.POST.get('email', '').strip()
-        program = request.POST.get('program', '').strip()
-        grade = request.POST.get('grade', '').strip()
-
-        errors = []
-        if not username:
-            errors.append('Username is required')
-        if not email:
-            errors.append('Email is required')
-        elif not email.endswith('@yale.edu'):
-            errors.append('You must register with a Yale email address (@yale.edu)')
-        if not program:
-            errors.append('Major/Program is required')
-        if not grade:
-            errors.append('Grade/Year is required')
-
-        if errors:
-            return render(request, 'register.html', {
-                'errors': errors,
-                'username': username,
-                'email': email,
-                'program': program,
-                'grade': grade,
-            })
-
-        # Create inactive user (no password yet)
-        try:
-            user = User.objects.create_user(
-                username=username, 
-                email=email,
-                password=None  # No password until verification
-            )
-            user.program = program
-            user.grade = grade
-            user.is_active = False  # Inactive until verified
-            user.save()
-        except IntegrityError:
-            return render(request, 'register.html', {
-                'errors': ['Username or email already in use'],
-                'username': username,
-                'email': email,
-                'program': program,
-                'grade': grade,
-            })
-
-        # Send verification email
-        email_sent = _send_verification_email(user, email)
-        
-        if email_sent:
-            return render(request, 'register.html', {
-                'success': 'Registration successful! Check your Yale email to verify and set your password.',
-                'email': email,
-            })
-        else:
-            return render(request, 'register.html', {
-                'success': 'Account created, but email failed to send. Please contact support.',
-                'email': email,
-            })
-
-    return render(request, 'register.html')
-
-
-def verify_email_view(request, uidb64, token):
-    """Email verification - allows user to set password"""
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    
-    if user is None or not default_token_generator.check_token(user, token):
-        return render(request, 'verify_email.html', {
-            'error': 'Invalid or expired verification link',
-        })
-    
-    if request.method == 'POST':
-        password = request.POST.get('password', '')
-        password2 = request.POST.get('password2', '')
-        
-        if not password:
-            return render(request, 'verify_email.html', {
-                'error': 'Password is required',
-                'user': user,
-            })
-        
-        if password != password2:
-            return render(request, 'verify_email.html', {
-                'error': 'Passwords do not match',
-                'user': user,
-            })
-        
-        # Set password and activate user
-        user.set_password(password)
-        user.is_active = True
-        user.save()
-        
-        # Auto-login
-        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        
-        return render(request, 'verify_email.html', {
-            'success': True,
-            'user': user,
-        })
-    
-    return render(request, 'verify_email.html', {'user': user})
-
-
-# =============================
-# Posts API (for React frontend)
-# =============================
-
+# Posts API Feature (from teammates)
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
     serializer_class = PostSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
-    parser_classes = [MultiPartParser, FormParser, JSONParser]
 
     def get_queryset(self):
         queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
-<<<<<<< HEAD
-        # If filtering by circle, enforce membership visibility: non-members (and non-staff)
-        # should not see posts from private circles.
-        circle_id = self.request.query_params.get('circle')
+
+        # Circle-specific filter (frontend may pass ?circle=<id>)
+        circle_id = self.request.query_params.get('circle', None)
+        user = getattr(self.request, 'user', None)
+
         if circle_id:
+            # If a circle is requested, only return posts in that circle.
+            # Enforce membership: only members (or staff) can view circle posts.
             try:
-                circle_id_int = int(circle_id)
-            except Exception:
+                cid = int(circle_id)
+            except (TypeError, ValueError):
                 return queryset.none()
-            queryset = queryset.filter(circle_id=circle_id_int)
-            user = getattr(self.request, 'user', None)
-            # Staff can always see
-            if user and getattr(user, 'is_staff', False):
-                return queryset
-            # If user is not authenticated or not a member, return empty queryset
-            if not user or not getattr(user, 'is_authenticated', False):
-                return queryset.none()
-            from core.models import CircleMembership
-            is_member = CircleMembership.objects.filter(circle_id=circle_id_int, user=user).exists()
-            if not is_member:
-                return queryset.none()
-=======
-        _feed = self.request.query_params.get('feed')
->>>>>>> feature/10-personal-profile
+            # quick membership check
+            if user and getattr(user, 'is_authenticated', False):
+                is_member = CircleMembership.objects.filter(user=user, circle_id=cid).exists()
+                if user.is_staff or is_member:
+                    return queryset.filter(circle__id=cid)
+                else:
+                    return queryset.none()
+            # anonymous users cannot view circle posts
+            return queryset.none()
+
+        # No circle specified: enforce membership visibility
+        # - Authenticated users: show posts with no circle OR posts in circles they belong to
+        # - Anonymous users: only show posts with no circle
+        if user and getattr(user, 'is_authenticated', False):
+            member_circle_ids = CircleMembership.objects.filter(user=user).values_list('circle_id', flat=True)
+            queryset = queryset.filter(Q(circle__isnull=True) | Q(circle__in=member_circle_ids))
+        else:
+            queryset = queryset.filter(circle__isnull=True)
+
         return queryset
 
     def get_serializer_context(self):
@@ -422,45 +148,47 @@ class PostViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         data = request.data.copy()
-<<<<<<< HEAD
-        # If client didn't provide is_anonymous, default to the inverse of user's preference
+        # Default anonymity: if user prefers real-name posts (post_with_real_name=True) then anonymous=False
         if 'is_anonymous' not in data:
             data['is_anonymous'] = not bool(getattr(user, 'post_with_real_name', False))
-        # We no longer inject `post` into the incoming data; instead we attach it on save.
         serializer = CommentSerializer(data=data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save(user=user, post=post)
-=======
-        data['post'] = post.id
-        data['user'] = user.id
-        serializer = CommentSerializer(data=data, context={'request': request})
-        if serializer.is_valid():
-            serializer.save()
->>>>>>> feature/10-personal-profile
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        try:
+            if serializer.is_valid():
+                serializer.save(user=user, post=post)
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+        except Exception as exc:
+            logging.error("Comment creation failed: %s", exc)
+            logging.error(traceback.format_exc())
+            return Response({
+                'detail': 'Server error creating comment',
+                'exception': str(exc),
+                'trace': traceback.format_exc().splitlines()[-5:]
+            }, status=500)
 
     def perform_create(self, serializer):
-        if not self.request.user.is_authenticated:
-            raise PermissionError('Authentication required')
-<<<<<<< HEAD
-        # Determine anonymity: prefer explicit client value; otherwise default to
-        # user's profile preference (post_with_real_name).
+        # Enforce circle membership: if the incoming data includes a circle id,
+        # ensure the requesting user is a member of that circle (or staff).
         user = self.request.user
-        is_anonymous = serializer.validated_data.get('is_anonymous', None)
-        if is_anonymous is None:
-            is_anonymous = not bool(getattr(user, 'post_with_real_name', False))
-        # If posting to a circle, require membership (unless staff)
-        circle = serializer.validated_data.get('circle')
-        if circle is not None and not user.is_staff:
-            from core.models import CircleMembership
-            if not CircleMembership.objects.filter(circle=circle, user=user).exists():
-                raise PermissionDenied('Must be a member of the circle to post')
+        circle = None
+        # serializer.validated_data is available because DRF validates before calling perform_create
+        if hasattr(serializer, 'validated_data') and serializer.validated_data:
+            circle = serializer.validated_data.get('circle')
 
-        serializer.save(user=user, is_anonymous=is_anonymous)
-=======
-        serializer.save(user=self.request.user)
->>>>>>> feature/10-personal-profile
+        # Save if no circle or membership is valid
+        if circle is None:
+            serializer.save(user=user)
+            return
+
+        # circle is an instance; check membership
+        from .models import CircleMembership
+        if user.is_staff or CircleMembership.objects.filter(user=user, circle=circle).exists():
+            serializer.save(user=user)
+            return
+
+        # Not a member => forbid
+        from rest_framework.exceptions import PermissionDenied
+        raise PermissionDenied('You must join the circle before posting to it')
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -472,8 +200,6 @@ class PostViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
-<<<<<<< HEAD
-=======
 class CircleViewSet(viewsets.ModelViewSet):
     queryset = Circle.objects.all().order_by('name')
     serializer_class = CircleSerializer
@@ -487,23 +213,77 @@ class CircleViewSet(viewsets.ModelViewSet):
         context['request'] = self.request
         return context
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def join(self, request, pk=None):
-        if not request.user.is_authenticated:
-            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        """API endpoint for a user to request or directly join a circle."""
+        user = request.user
         circle = self.get_object()
-        _, created = CircleMembership.objects.get_or_create(user=request.user, circle=circle)
-        return Response({'joined': True, 'created': created})
 
-    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
+        # 1. Check if user is already a member or pending
+        if CircleMembership.objects.filter(circle=circle, user=user).exists():
+            return Response(
+                {"detail": "You are already a member or your request is pending."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Determine role based on privacy setting
+        if circle.is_private:
+            # Private circle: Role is 'pending'
+            initial_role = 'pending'
+            message = f"Request to join '{circle.name}' sent. Waiting for admin approval."
+            http_status = status.HTTP_202_ACCEPTED
+        else:
+            # Public circle: Role is 'member'
+            initial_role = 'member'
+            message = f"Successfully joined '{circle.name}'."
+            http_status = status.HTTP_201_CREATED
+
+        # 3. Create Membership record
+        CircleMembership.objects.create(
+            circle=circle,
+            user=user,
+            role=initial_role
+        )
+
+        return Response({"message": message}, status=http_status)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def leave(self, request, pk=None):
-        if not request.user.is_authenticated:
-            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        """Leave a circle (removes membership)."""
         circle = self.get_object()
         deleted, _ = CircleMembership.objects.filter(user=request.user, circle=circle).delete()
-        return Response({'left': True, 'deleted_count': deleted})
+        if deleted:
+            return Response({'message': f"Left '{circle.name}' successfully."})
+        return Response({'detail': 'You are not a member of this circle.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
->>>>>>> feature/10-personal-profile
-# Registration & email verification views removed.
-# (register_view, email_verification_view, email_verification_confirm_view, email_verification_api_view)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_membership(request, member_id):
+    """API endpoint for an admin/creator to approve a pending membership request."""
+    
+    membership = get_object_or_404(CircleMembership, pk=member_id)
+    circle = membership.circle
+    current_user = request.user
+    
+    # 1. Permission Check: Ensure current_user is an admin or creator
+    if not is_circle_admin_or_creator(current_user, circle):
+        return Response(
+            {"detail": "You do not have administrative privileges for this circle."}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # 2. Status Check & Approval Logic
+    if membership.role == 'pending':
+        membership.role = 'member'
+        membership.save()
+        return Response(
+            {"message": f"Approved user {membership.user.username} for {circle.name}."}, 
+            status=status.HTTP_200_OK
+        )
+    
+    # If the role is already 'member', 'admin', or 'creator'
+    return Response(
+        {"detail": "Membership is already active or does not require approval."}, 
+        status=status.HTTP_400_BAD_REQUEST
+    )
