@@ -2,12 +2,26 @@ from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from core.views import PostViewSet
-from .auth_views import login_view, get_csrf_token
+from core.views import PostViewSet, CircleViewSet
+from .auth_views import (
+    login_view, 
+    get_csrf_token, 
+    logout_view, 
+    register_view, 
+    me_view, 
+    debug_cookies_view, 
+    health_view
+)
+
+# Simple redirect function for root path
+def redirect_root_to_profile(request):
+    return HttpResponseRedirect('/profile/')
 
 router = DefaultRouter()
 router.register(r'posts', PostViewSet, basename='post')
