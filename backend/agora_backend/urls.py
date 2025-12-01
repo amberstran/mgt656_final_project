@@ -21,11 +21,12 @@ from rest_framework.routers import DefaultRouter
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from core.views import PostViewSet
+from core.views import PostViewSet, CircleViewSet
 from .auth_views import login_view, get_csrf_token
 
 router = DefaultRouter()
 router.register(r'posts', PostViewSet, basename='post')
+router.register(r'circles', CircleViewSet, basename='circle')
 
 # Handle favicon requests (browsers automatically request this)
 @api_view(['GET'])
@@ -42,7 +43,7 @@ def users_view(request, user_id=None):
 @api_view(['GET', 'POST'])
 @permission_classes([AllowAny])
 def circles_view(request):
-    return Response({'detail': 'Circles endpoint not implemented'}, status=404)
+    return Response({'detail': 'Use /api/circles/ via router'}, status=404)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -50,8 +51,6 @@ urlpatterns = [
     path('api/auth/csrf/', get_csrf_token, name='csrf-token'),
     path('api/auth/login/', login_view, name='login'),
     path('api/users/<int:user_id>/', users_view, name='user-detail'),
-    path('api/circles/', circles_view, name='circles-list'),
-    path('api/circles/<int:circle_id>/join/', circles_view, name='circle-join'),
-    path('api/circles/<int:circle_id>/leave/', circles_view, name='circle-leave'),
+    # Circles are now handled by DRF router: /api/circles/, /api/circles/{id}/join, /leave
     path('api/', include(router.urls)),
 ]

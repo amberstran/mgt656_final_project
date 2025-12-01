@@ -3,6 +3,8 @@ import './App.css';
 import PostsList from './components/PostsList';
 import Login from './components/Login';
 import axios from 'axios';
+import CirclesList from './components/CirclesList';
+import CircleFeature from './components/CircleFeature';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -20,6 +22,9 @@ function App() {
       });
   }, []);
 
+  const path = window.location.pathname;
+  const isCirclesPage = path.startsWith('/profile/circle');
+
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="agora-header">
@@ -27,6 +32,20 @@ function App() {
           <div className="yale-logo-text">YALE</div>
           <h1 className="text-4xl font-bold text-white text-center drop-shadow">Agora</h1>
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <a 
+                href="/"
+                className="px-3 py-1 text-white text-sm hover:bg-white hover:bg-opacity-20 rounded transition"
+              >
+                Feed
+              </a>
+              <a 
+                href="/profile/circle"
+                className="px-3 py-1 text-white text-sm hover:bg-white hover:bg-opacity-20 rounded transition"
+              >
+                Circles
+              </a>
+            </div>
             <div>
               <label className="mr-2 text-white text-sm">Sort:</label>
               <select 
@@ -49,7 +68,11 @@ function App() {
         </div>
       </div>
       {showLogin && <Login onLogin={() => setShowLogin(false)} />}
-      <PostsList feedType={feedType} />
+      {isCirclesPage ? (
+        <CircleFeature />
+      ) : (
+        <PostsList feedType={feedType} />
+      )}
     </div>
   );
 }

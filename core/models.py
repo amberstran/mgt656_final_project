@@ -16,8 +16,11 @@ class CustomUser(AbstractUser):
 
 
 class Circle(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
+    is_private = models.BooleanField(default=False)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='owned_circles', null=True, blank=True)
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='CircleMembership', related_name='joined_circles')
 
     def __str__(self):
         return self.name
@@ -60,15 +63,26 @@ class Like(models.Model):
 
 
 class CircleMembership(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    circle = models.ForeignKey(Circle, on_delete=models.CASCADE)
+    """
+    Intermediate model to manage user roles and status within a specific Circle.
+    """
+    MEMBER_ROLES = (
+        ('creator', 'Creator'),       # Can delete circle, assign admins
+        ('admin', 'Admin'),           # Can approve members, manage content
+        ('member', 'Member'),         # Can post content
+        ('pending', 'Pending Approval'), # User applied to join private circle
+    )
+
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, related_name='memberships')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='circle_memberships')
+    role = models.CharField(max_length=20, choices=MEMBER_ROLES, default='member')
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "circle")
+        unique_together = ('circle', 'user')
 
     def __str__(self):
-        return f"{self.user} in {self.circle}"
+        return f"{self.user.username} as {self.get_role_display()} in {self.circle.name}"
 
 
 class Message(models.Model):

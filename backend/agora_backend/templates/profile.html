@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Profile | Agora</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 420px;
+      margin: 40px auto;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      padding: 24px;
+      text-align: center;
+    }
+    .avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: #d8d8d8;
+      margin: 0 auto 16px;
+    }
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .stats div { font-size: 14px; }
+    .stats strong {
+      display: block;
+      font-size: 18px;
+      margin-top: 4px;
+      color: #222;
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tab {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-weight: 500;
+      border: 1px solid #ccc;
+      background: #eee;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .tab.active {
+      border: 2px solid #007aff;
+      color: #007aff;
+      background: #fff;
+    }
+    .bar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .bar {
+      background: #fff;
+      border: 1px solid #e2d2d2;
+      border-radius: 12px;
+      padding: 14px;
+      text-align: left;
+      font-weight: 600;
+      color: #333;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      display: block;
+    }
+    .bar:hover {
+      background: #ffecec;
+      border-color: #ffb3b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="avatar"></div>
+
+    {% if user.is_authenticated %}
+      <h3 style="margin: 0 0 4px 0; color: #222;">{{ user.username }}</h3>
+      {% if user.program or user.grade %}
+        <p style="margin: 0 0 16px 0; color: #999; font-size: 14px;">
+          {% if user.program %}{{ user.program }}{% endif %}{% if user.program and user.grade %}, {% endif %}{% if user.grade %}{{ user.grade }}{% endif %}
+        </p>
+      {% endif %}
+    {% endif %}
+
+    <div class="stats">
+      <div>Posts<strong>{{ stats.posts|default:3 }}</strong></div>
+      <div>Likes<strong>{{ stats.likes|default:12 }}</strong></div>
+      <div>Agora Sparks<strong>{{ stats.score|default:8 }}</strong></div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab" id="tab-messages" onclick="showTab('messages')">My Posts</div>
+      <div class="tab active" id="tab-circles" onclick="showTab('circles')">Circle Messages</div>
+    </div>
+
+    <div id="content-messages" class="tab-content" style="display:none;">
+      <div class="bar-list">
+        {% if user.is_authenticated %}
+          <div class="bar" onclick="window.location.href='/profile/my-posts/'" style="cursor:pointer;">My posts</div>
+          <div class="bar" onclick="window.location.href='/profile/my-comments/'" style="cursor:pointer;">My comments</div>
+          <div class="bar">Agora Sparks</div>
+          <div class="bar" style="cursor: default; opacity: .6;">Profile editing (soon)</div>
+        {% else %}
+          <div class="bar" style="background:#fff7e6; border-color:#f5c46b;">Your journey in days</div>
+          <div class="bar" onclick="window.location.href='/accounts/login/?next=/profile/'" style="background:#e6f0ff; border-color:#87adef; cursor: pointer;">Sign in to participate</div>
+          <a class="bar" href="/profile/my-posts/">My posts</a>
+          <a class="bar" href="/profile/my-comments/">My comments</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <div id="content-circles" class="tab-content">
+      <h3 style="text-align: left; font-size: 16px; margin: 0 0 12px 0; color: #555;">Your Circles</h3>
+      {% if user.is_authenticated %}
+        {% if user_circles %}
+          <div class="bar-list" style="margin-bottom: 24px;">
+            {% for item in user_circles %}
+              <div class="bar" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>{{ item.circle.name }}</strong>
+                  <span style="font-size: 12px; color: #999; margin-left: 8px;">{{ item.role }}</span>
+                </div>
+                <form method="POST" action="/api/circles/{{ item.circle.id }}/leave/" style="margin: 0;">
+                  {% csrf_token %}
+                  <button type="submit" style="padding: 6px 12px; background: #f0f0f0; border: 1px solid #ccc; border-radius: 6px; cursor: pointer; font-size: 13px;">Leave</button>
+                </form>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="text-align: left; color: #999; font-size: 14px; margin-bottom: 20px;">You haven't joined any circles yet.</p>
+        {% endif %}
+
+        <h3 style="text-align: left; font-size: 16px; margin: 20px 0 12px 0; color: #555;">All Circles</h3>
+        <div class="bar-list">
+          {% for circle in all_circles %}
+            <div class="bar" style="display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <strong>{{ circle.name }}</strong>
+                {% if circle.is_private %}<span style="font-size: 12px; color: #999;">🔒 Private</span>{% endif %}
+                <div style="font-size: 12px; color: #999;">{{ circle.description|truncatewords:10 }}</div>
+                <div style="font-size: 11px; color: #aaa;">{{ circle.member_count }} members</div>
+              </div>
+              <form method="POST" action="/api/circles/{{ circle.id }}/join/" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" style="padding: 6px 12px; background: #007aff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px;">
+                  {% if circle.is_private %}Request Join{% else %}Join{% endif %}
+                </button>
+              </form>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p style="text-align: left; color: #999; font-size: 14px;">
+          <a href="/accounts/login/?next=/profile/" style="color: #007aff;">Sign in</a> to join circles.
+        </p>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    function showTab(tab) {
+      // Hide all content
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      
+      // Show selected
+      if (tab === 'messages') {
+        document.getElementById('content-messages').style.display = 'block';
+        document.getElementById('tab-messages').classList.add('active');
+      } else {
+        document.getElementById('content-circles').style.display = 'block';
+        document.getElementById('tab-circles').classList.add('active');
+      }
+    }
+  </script>
+</body>
+</html>
