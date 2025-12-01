@@ -4,6 +4,7 @@ import './App.css';
 import PostsList from './components/PostsList';
 import Login from './components/Login';
 import CircleFeature from './components/CircleFeature';
+import CreatePostModal from './components/CreatePostModal';
 import axios from 'axios';
 
 function AppContent() {
@@ -15,6 +16,8 @@ function AppContent() {
   const [currentUser, setCurrentUser] = useState(null);
   const [feedType, setFeedType] = useState('new');
   const [selectedCircle, setSelectedCircle] = useState(null);
+  const [showCreatePost, setShowCreatePost] = useState(false);
+  const [reloadTrigger, setReloadTrigger] = useState(0);
 
   const isCirclePage = location.pathname === '/profile/circle';
 
@@ -82,7 +85,28 @@ function AppContent() {
         </div>
       </div>
       {showLogin && <Login onLogin={() => setShowLogin(false)} />}
-      <PostsList feedType={feedType} />
+      <PostsList feedType={feedType} key={reloadTrigger} />
+      
+      {/* Floating Create Post Button */}
+      {isAuthed && (
+        <button
+          onClick={() => setShowCreatePost(true)}
+          className="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center text-2xl transition-all duration-200 hover:scale-110 z-50"
+          title="Create Post"
+        >
+          +
+        </button>
+      )}
+      
+      {/* Create Post Modal */}
+      <CreatePostModal
+        open={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+        onCreated={() => {
+          setShowCreatePost(false);
+          setReloadTrigger(prev => prev + 1);
+        }}
+      />
     </div>
   );
 }
