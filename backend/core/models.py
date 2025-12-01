@@ -40,11 +40,43 @@ class CustomUser(AbstractUser):
 # === Social models (ported from teammates' app) ===
 
 class Circle(models.Model):
+    """Community circles with membership and privacy settings."""
+    MEMBER_ROLES = [
+        ('creator', 'Creator'),
+        ('admin', 'Admin'),
+        ('member', 'Member'),
+        ('pending', 'Pending'),
+    ]
+    
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
+    is_private = models.BooleanField(default=False)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='created_circles')
+    members = models.ManyToManyField(settings.AUTH_USER_MODEL, through='CircleMembership', related_name='circles')
 
     def __str__(self):
         return self.name
+
+
+class CircleMembership(models.Model):
+    """Membership relationship between users and circles with roles."""
+    MEMBER_ROLES = [
+        ('creator', 'Creator'),
+        ('admin', 'Admin'),
+        ('member', 'Member'),
+        ('pending', 'Pending'),
+    ]
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='circle_memberships')
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, related_name='memberships')
+    role = models.CharField(max_length=20, choices=MEMBER_ROLES, default='member')
+    joined_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'circle')
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.circle.name} ({self.get_role_display()})"
 
 
 class Post(models.Model):
@@ -84,18 +116,6 @@ class Like(models.Model):
 
     def __str__(self):
         return f"{self.user} likes {self.post}"
-
-
-class CircleMembership(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    circle = models.ForeignKey(Circle, on_delete=models.CASCADE)
-    joined_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        unique_together = ("user", "circle")
-
-    def __str__(self):
-        return f"{self.user} in {self.circle}"
 
 
 class Message(models.Model):

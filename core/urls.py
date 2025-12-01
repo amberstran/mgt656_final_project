@@ -7,6 +7,11 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('canvas/', views.canvas_verify_view, name='canvas_verify'),
     
-    # API routes (if needed in addition to router in main urls.py)
-    # Note: Post API is already handled by router in backend/agora_backend/urls.py
+    # API routes
+    path('posts/', api_views.PostListAPIView.as_view(), name='post-list'),
+    path('posts/<int:pk>/', api_views.PostDetailAPIView.as_view(), name='post-detail'),
+    
+    # Circle membership approval
+    path('circles/membership/<int:member_id>/approve/', views.approve_membership, name='membership-approve'),
 ]
+

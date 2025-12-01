@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Comment, Like
+from .models import Post, Comment, Like, Circle, CircleMembership
 
 
 class UserLiteSerializer(serializers.Serializer):
@@ -70,3 +70,28 @@ class PostSerializer(serializers.ModelSerializer):
         except Exception as e:
             # Fallback to empty list if there's an error
             return []
+
+
+class CircleSerializer(serializers.ModelSerializer):
+    member_count = serializers.IntegerField(read_only=True)
+    is_member = serializers.SerializerMethodField()
+    user_role = serializers.SerializerMethodField()
+    is_private = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Circle
+        fields = ['id', 'name', 'description', 'is_private', 'member_count', 'is_member', 'user_role']
+
+    def get_is_member(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return False
+        membership = CircleMembership.objects.filter(user=request.user, circle=obj).first()
+        return membership is not None and membership.role != 'pending'
+
+    def get_user_role(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return None
+        membership = CircleMembership.objects.filter(user=request.user, circle=obj).first()
+        return membership.role if membership else None

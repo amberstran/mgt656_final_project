@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Post, Comment
+from .models import Post, Comment, Circle, CircleMembership
 
 
 class UserLiteSerializer(serializers.Serializer):
@@ -98,3 +98,31 @@ class PostSerializer(serializers.ModelSerializer):
                     'display_name': 'Anonymous',
                 }
         return data
+
+
+class CircleSerializer(serializers.ModelSerializer):
+    member_count = serializers.IntegerField(read_only=True)
+    is_member = serializers.SerializerMethodField()
+    user_role = serializers.SerializerMethodField()
+    is_private = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = Circle
+        fields = ['id', 'name', 'description', 'is_private', 'member_count', 'is_member', 'user_role']
+
+    def get_is_member(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return False
+        return CircleMembership.objects.filter(user=request.user, circle=obj).exists()
+
+    def get_user_role(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user or not request.user.is_authenticated:
+            return None
+        try:
+            membership = CircleMembership.objects.get(user=request.user, circle=obj)
+            return membership.role
+        except CircleMembership.DoesNotExist:
+            return None
+

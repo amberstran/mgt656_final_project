@@ -38,14 +38,15 @@ class CustomUserAdmin(UserAdmin):
 
 @admin.register(Circle)
 class CircleAdmin(admin.ModelAdmin):
-	list_display = ('id', 'name', 'description')
+	list_display = ('id', 'name', 'description', 'is_private', 'created_by')
+	list_filter = ('is_private',)
 	search_fields = ('name',)
 
 
 @admin.register(CircleMembership)
 class CircleMembershipAdmin(admin.ModelAdmin):
-	list_display = ('id', 'user', 'circle', 'joined_at')
-	list_filter = ('circle',)
+	list_display = ('id', 'user', 'circle', 'role', 'joined_at')
+	list_filter = ('circle', 'role')
 	search_fields = ('user__username', 'circle__name')
 
 

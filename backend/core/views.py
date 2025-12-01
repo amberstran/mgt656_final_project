@@ -15,11 +15,18 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+<<<<<<< HEAD
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 
 from .models import Post, Comment, Like
 from .serializers import PostSerializer, CommentSerializer
+=======
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+
+from .models import Post, Comment, Like, Circle, CircleMembership
+from .serializers import PostSerializer, CommentSerializer, CircleSerializer
+>>>>>>> feature/10-personal-profile
 
 """Profile-focused views only.
 
@@ -76,7 +83,30 @@ def profile_view(request):
         "level_hint": level["hint"]
     })
     
+<<<<<<< HEAD
     return render(request, "profile.html", {"stats": stats})
+=======
+    # Get user's circles if authenticated
+    user_circles = []
+    all_circles = Circle.objects.all().annotate(member_count=Count('memberships'))
+    if request.user.is_authenticated:
+        user_memberships = CircleMembership.objects.filter(user=request.user).select_related('circle')
+        user_circles = [
+            {
+                'circle': m.circle,
+                'role': m.get_role_display(),
+                'role_code': m.role,
+                'member_count': Circle.objects.filter(id=m.circle.id).annotate(cnt=Count('memberships')).first().cnt if Circle.objects.filter(id=m.circle.id).exists() else 0
+            }
+            for m in user_memberships
+        ]
+    
+    return render(request, "profile.html", {
+        "stats": stats,
+        "user_circles": user_circles,
+        "all_circles": all_circles
+    })
+>>>>>>> feature/10-personal-profile
 
 
 @login_required
@@ -111,6 +141,7 @@ def profile_api_view(request):
         "level_hint": level["hint"]
     })
     
+<<<<<<< HEAD
     # If user is authenticated, include basic user info and preferences
     user_data = None
     if request.user and getattr(request.user, 'is_authenticated', False):
@@ -139,6 +170,9 @@ def profile_api_view(request):
             return JsonResponse({'user': user_data})
 
     return JsonResponse({"stats": stats, 'user': user_data})
+=======
+    return JsonResponse({"stats": stats})
+>>>>>>> feature/10-personal-profile
 
 # ============================================================================
 # VIEWS: REGISTRATION & EMAIL VERIFICATION
@@ -333,6 +367,7 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = Post.objects.all().order_by('-created_at').annotate(likes_count=Count('likes'))
+<<<<<<< HEAD
         # If filtering by circle, enforce membership visibility: non-members (and non-staff)
         # should not see posts from private circles.
         circle_id = self.request.query_params.get('circle')
@@ -353,6 +388,9 @@ class PostViewSet(viewsets.ModelViewSet):
             is_member = CircleMembership.objects.filter(circle_id=circle_id_int, user=user).exists()
             if not is_member:
                 return queryset.none()
+=======
+        _feed = self.request.query_params.get('feed')
+>>>>>>> feature/10-personal-profile
         return queryset
 
     def get_serializer_context(self):
@@ -384,6 +422,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if not user or not user.is_authenticated:
             return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
         data = request.data.copy()
+<<<<<<< HEAD
         # If client didn't provide is_anonymous, default to the inverse of user's preference
         if 'is_anonymous' not in data:
             data['is_anonymous'] = not bool(getattr(user, 'post_with_real_name', False))
@@ -391,12 +430,20 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer = CommentSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save(user=user, post=post)
+=======
+        data['post'] = post.id
+        data['user'] = user.id
+        serializer = CommentSerializer(data=data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+>>>>>>> feature/10-personal-profile
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
             raise PermissionError('Authentication required')
+<<<<<<< HEAD
         # Determine anonymity: prefer explicit client value; otherwise default to
         # user's profile preference (post_with_real_name).
         user = self.request.user
@@ -411,6 +458,9 @@ class PostViewSet(viewsets.ModelViewSet):
                 raise PermissionDenied('Must be a member of the circle to post')
 
         serializer.save(user=user, is_anonymous=is_anonymous)
+=======
+        serializer.save(user=self.request.user)
+>>>>>>> feature/10-personal-profile
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -422,5 +472,38 @@ class PostViewSet(viewsets.ModelViewSet):
         return super().destroy(request, *args, **kwargs)
 
 
+<<<<<<< HEAD
+=======
+class CircleViewSet(viewsets.ModelViewSet):
+    queryset = Circle.objects.all().order_by('name')
+    serializer_class = CircleSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Circle.objects.all().order_by('name').annotate(member_count=Count('memberships'))
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def join(self, request, pk=None):
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        circle = self.get_object()
+        _, created = CircleMembership.objects.get_or_create(user=request.user, circle=circle)
+        return Response({'joined': True, 'created': created})
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticatedOrReadOnly])
+    def leave(self, request, pk=None):
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=status.HTTP_401_UNAUTHORIZED)
+        circle = self.get_object()
+        deleted, _ = CircleMembership.objects.filter(user=request.user, circle=circle).delete()
+        return Response({'left': True, 'deleted_count': deleted})
+
+
+>>>>>>> feature/10-personal-profile
 # Registration & email verification views removed.
 # (register_view, email_verification_view, email_verification_confirm_view, email_verification_api_view)

@@ -1,29 +1,22 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import './App.css';
 import PostsList from './components/PostsList';
 import Login from './components/Login';
-import Landing from './components/Landing';
-import BottomNav from './components/BottomNav';
-import CreatePostModal from './components/CreatePostModal';
+import CircleFeature from './components/CircleFeature';
 import axios from 'axios';
-import CirclesPanel from './components/CirclesPanel';
-import AuthDebug from './components/AuthDebug';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
-import Signup from './components/Signup';
-import Profile from './components/Profile';
-import UserMenu from './components/UserMenu';
 
 function AppContent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showLogin, setShowLogin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
-  const [showLanding, setShowLanding] = useState(true);
   const [feedType, setFeedType] = useState('new');
-  const [showCreate, setShowCreate] = useState(false);
-  const [reloadSignal, setReloadSignal] = useState(0);
   const [selectedCircle, setSelectedCircle] = useState(null);
+
+  const isCirclePage = location.pathname === '/profile/circle';
 
   // Initial auth + CSRF bootstrap
   useEffect(() => {
@@ -50,99 +43,46 @@ function AppContent() {
       .finally(() => setAuthChecked(true));
   }, []);
 
-  if (showLanding) {
-    return <Landing onEnter={() => setShowLanding(false)} />;
-  }
-
-  // While checking auth, show a minimal loading state
-  if (!authChecked) {
-    return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading...</div>;
+  if (isCirclePage) {
+    return <CircleFeature />;
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Routes>
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/" element={
-          <>
-            <div className="agora-header">
-              <div className="agora-header-content" style={{ justifyContent: 'center' }}>
-                <div className="yale-logo-text">YALE</div>
-                <h1 className="text-4xl font-bold text-white text-center drop-shadow" style={{ margin: '0 2rem' }}>Agora</h1>
-                <div className="bg-white/20 rounded-lg p-1 flex text-white text-sm">
-                  {['new','top'].map((t) => (
-                    <button
-                      key={t}
-                      onClick={() => setFeedType(t)}
-                      className={`px-3 py-1 rounded-md transition-colors ${feedType === t ? 'bg-white text-blue-700' : 'text-white/90 hover:bg-white/10'}`}
-                    >
-                      {t === 'new' ? 'Latest' : 'Hot'}
-                    </button>
-                  ))}
-                </div>
-                {isAuthed && currentUser && (
-                  <div style={{ position: 'absolute', right: '1rem' }}>
-                    <UserMenu 
-                      username={currentUser.username} 
-                      onLogout={() => {
-                        setIsAuthed(false);
-                        setCurrentUser(null);
-                        setShowLogin(true);
-                      }} 
-                    />
-                  </div>
-                )}
-              </div>
+      <div className="agora-header">
+        <div className="agora-header-content">
+          <div className="yale-logo-text">YALE</div>
+          <h1 className="text-4xl font-bold text-white text-center drop-shadow">Agora</h1>
+          <div className="flex items-center gap-4">
+            <div>
+              <label className="mr-2 text-white text-sm">Sort:</label>
+              <select 
+                value={feedType} 
+                onChange={(e) => setFeedType(e.target.value)} 
+                className="border rounded p-1 text-sm"
+              >
+                <option value="new">New</option>
+                <option value="all">All</option>
+                <option value="top">Top</option>
+              </select>
             </div>
-            {showLogin && !isAuthed && (
-              <div style={{ maxWidth: 440, margin: '1rem auto' }}>
-                <Login onLogin={() => {
-                  // After login, re-check auth
-                  const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-                  axios.get(`${apiUrl}/api/auth/me/`, { withCredentials: true })
-                    .then(r => {
-                      if (r.data?.authenticated) {
-                        setIsAuthed(true);
-                        setShowLogin(false);
-                      }
-                    });
-                }} />
-                <p style={{ 
-                  marginTop: '1rem', 
-                  fontSize: '0.875rem', 
-                  color: '#666', 
-                  textAlign: 'center' 
-                }}>
-                  Don't have an account?{' '}
-                  <Link 
-                    to="/signup" 
-                    style={{ 
-                      color: '#667eea', 
-                      fontWeight: '600', 
-                      textDecoration: 'none' 
-                    }}
-                  >
-                    Sign up here
-                  </Link>
-                </p>
-              </div>
-            )}
-            <CirclesPanel selectedCircleId={selectedCircle} onSelect={setSelectedCircle} />
-            <PostsList feedType={feedType} reloadSignal={reloadSignal} circleId={selectedCircle} />
-            <BottomNav
-              onCreate={() => setShowCreate(true)}
-              onProfile={() => navigate('/profile')}
-            />
-            <CreatePostModal
-              open={showCreate}
-              onClose={() => setShowCreate(false)}
-              onCreated={() => setReloadSignal((s) => s + 1)}
-            />
-            <AuthDebug />
-          </>
-        } />
-      </Routes>
+            <button
+              onClick={() => navigate('/profile/circle')}
+              className="ml-4 px-5 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow transform hover:scale-105 active:scale-95"
+            >
+              Circles
+            </button>
+            <button
+              onClick={() => setShowLogin(!showLogin)}
+              className="ml-4 px-5 py-2 bg-white bg-opacity-20 text-white rounded-lg hover:bg-opacity-30 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow transform hover:scale-105 active:scale-95"
+            >
+              {showLogin ? '✕ Close' : '🔑 Login'}
+            </button>
+          </div>
+        </div>
+      </div>
+      {showLogin && <Login onLogin={() => setShowLogin(false)} />}
+      <PostsList feedType={feedType} />
     </div>
   );
 }

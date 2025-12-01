@@ -1,18 +1,28 @@
 # core/views.py - Merged: Personal profile + Posts API
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 import logging, traceback
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.conf import settings
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django.db.models import Count
 
-from .models import Post, Like, Comment, CircleMembership
+from .models import Post, Like, Comment, Circle, CircleMembership
 from django.db.models import Q
-from .serializers import PostSerializer, CommentSerializer
+from .serializers import PostSerializer, CommentSerializer, CircleSerializer
+
+
+def is_circle_admin_or_creator(user, circle):
+    """Checks if the user has admin or creator role in the given circle."""
+    try:
+        membership = CircleMembership.objects.get(circle=circle, user=user)
+        return membership.role in ['admin', 'creator']
+    except CircleMembership.DoesNotExist:
+        return False
+
 
 # Personal Profile Feature
 LEVELS = [
@@ -39,7 +49,28 @@ def profile_view(request):
     score = stats["posts"] * 5 + stats["comments"] * 2 + stats["likes"]
     level = _calc_level(score)
     stats.update({"score": score, "level_name": level["name"], "level_hint": level["hint"]})
-    return render(request, "profile.html", {"stats": stats})
+    
+    # Get user's circles if authenticated
+    user_circles = []
+    all_circles = Circle.objects.all().annotate(member_count=Count('memberships'))
+    if request.user.is_authenticated:
+        user_memberships = CircleMembership.objects.filter(user=request.user).select_related('circle')
+        user_circles = [
+            {
+                'circle': m.circle,
+                'role': m.get_role_display(),
+                'role_code': m.role,
+                'member_count': Circle.objects.filter(id=m.circle.id).annotate(cnt=Count('memberships')).first().cnt if Circle.objects.filter(id=m.circle.id).exists() else 0
+            }
+            for m in user_memberships
+        ]
+    
+    return render(request, "profile.html", {
+        "stats": stats,
+        "user_circles": user_circles,
+        "all_circles": all_circles
+    })
+
 
 @login_required
 def canvas_verify_view(request):
@@ -167,3 +198,92 @@ class PostViewSet(viewsets.ModelViewSet):
         if instance.user != user and not user.is_staff:
             return Response({'detail': 'You do not have permission to delete this post.'}, status=403)
         return super().destroy(request, *args, **kwargs)
+
+
+class CircleViewSet(viewsets.ModelViewSet):
+    queryset = Circle.objects.all().order_by('name')
+    serializer_class = CircleSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get_queryset(self):
+        return Circle.objects.all().order_by('name').annotate(member_count=Count('memberships'))
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def join(self, request, pk=None):
+        """API endpoint for a user to request or directly join a circle."""
+        user = request.user
+        circle = self.get_object()
+
+        # 1. Check if user is already a member or pending
+        if CircleMembership.objects.filter(circle=circle, user=user).exists():
+            return Response(
+                {"detail": "You are already a member or your request is pending."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2. Determine role based on privacy setting
+        if circle.is_private:
+            # Private circle: Role is 'pending'
+            initial_role = 'pending'
+            message = f"Request to join '{circle.name}' sent. Waiting for admin approval."
+            http_status = status.HTTP_202_ACCEPTED
+        else:
+            # Public circle: Role is 'member'
+            initial_role = 'member'
+            message = f"Successfully joined '{circle.name}'."
+            http_status = status.HTTP_201_CREATED
+
+        # 3. Create Membership record
+        CircleMembership.objects.create(
+            circle=circle,
+            user=user,
+            role=initial_role
+        )
+
+        return Response({"message": message}, status=http_status)
+
+    @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
+    def leave(self, request, pk=None):
+        """Leave a circle (removes membership)."""
+        circle = self.get_object()
+        deleted, _ = CircleMembership.objects.filter(user=request.user, circle=circle).delete()
+        if deleted:
+            return Response({'message': f"Left '{circle.name}' successfully."})
+        return Response({'detail': 'You are not a member of this circle.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def approve_membership(request, member_id):
+    """API endpoint for an admin/creator to approve a pending membership request."""
+    
+    membership = get_object_or_404(CircleMembership, pk=member_id)
+    circle = membership.circle
+    current_user = request.user
+    
+    # 1. Permission Check: Ensure current_user is an admin or creator
+    if not is_circle_admin_or_creator(current_user, circle):
+        return Response(
+            {"detail": "You do not have administrative privileges for this circle."}, 
+            status=status.HTTP_403_FORBIDDEN
+        )
+    
+    # 2. Status Check & Approval Logic
+    if membership.role == 'pending':
+        membership.role = 'member'
+        membership.save()
+        return Response(
+            {"message": f"Approved user {membership.user.username} for {circle.name}."}, 
+            status=status.HTTP_200_OK
+        )
+    
+    # If the role is already 'member', 'admin', or 'creator'
+    return Response(
+        {"detail": "Membership is already active or does not require approval."}, 
+        status=status.HTTP_400_BAD_REQUEST
+    )
