@@ -287,3 +287,35 @@ def approve_membership(request, member_id):
         {"detail": "Membership is already active or does not require approval."}, 
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+# A/B Test Endpoint for team milky-hill
+# SHA1(milky-hill) = 1317ccaf707191816834ef3fc0bf040e87ef6d0a
+# Endpoint: /1317cca
+def abtest_view(request):
+    """
+    A/B test endpoint that displays team member nicknames and an alternating button.
+    Publicly accessible - no login required.
+    """
+    team_nicknames = [
+        "amberstran",      # Amber Tran
+        "AmeeshaMasand",   # Ameesha Masand
+        "toxiclee",        # Yiru Li
+    ]
+    
+    # Determine variant based on session or random
+    # Using session to maintain consistency per user
+    if 'abtest_variant' not in request.session:
+        import random
+        request.session['abtest_variant'] = random.choice(['A', 'B'])
+    
+    variant = request.session['abtest_variant']
+    button_text = "kudos" if variant == 'A' else "thanks"
+    
+    context = {
+        'team_nicknames': team_nicknames,
+        'button_text': button_text,
+        'variant': variant,
+    }
+    
+    return render(request, 'abtest.html', context)
