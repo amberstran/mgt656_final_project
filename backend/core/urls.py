@@ -15,6 +15,6 @@ urlpatterns = [
     path('verify/<uidb64>/<token>/', views.verify_email_view, name='verify_email'),
     path('api/', include(router.urls)),
     # A/B Test endpoint (publicly accessible, no login required)
-    path('1317cca', views.abtest_view, name='abtest'),
+    path('1317cca/', views.abtest_view, name='abtest'),
 ]
 

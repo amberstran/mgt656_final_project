@@ -60,8 +60,8 @@ urlpatterns = [
     path('api/circles/<int:circle_id>/join/', circles_view, name='circle-join'),
     path('api/circles/<int:circle_id>/leave/', circles_view, name='circle-leave'),
     path('api/', include(router.urls)),
-    path('', redirect_root_to_profile, name='root'),
-    path('', include('backend.core.urls')),  # Your profile and other core routes
+    path('', include('backend.core.urls')),  # Your profile and other core routes (must come before root redirect)
+    path('', redirect_root_to_profile, name='root'),  # Catch-all for root path
 ]
 
 if settings.DEBUG:
