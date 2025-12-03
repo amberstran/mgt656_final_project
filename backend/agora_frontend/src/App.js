@@ -13,6 +13,7 @@ import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import UserMenu from './components/UserMenu';
+import ABTest from './components/ABTest';
 
 function AppContent() {
   const navigate = useNavigate();
@@ -65,6 +66,7 @@ function AppContent() {
       <Routes>
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/1317cca" element={<ABTest />} />
         <Route path="/" element={
           <>
             <div className="agora-header">
