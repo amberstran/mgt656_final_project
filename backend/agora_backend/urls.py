@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from backend.core.views import PostViewSet
 from .auth_views import login_view, logout_view, get_csrf_token, me_view, debug_cookies_view, health_view, register_view
+from .abtest_views import abtest_view
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework import status
@@ -166,6 +167,7 @@ def circles_view(request, circle_id=None):
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('favicon.ico', favicon_view, name='favicon'),
+    path('1317cca/', abtest_view, name='abtest'),  # A/B test endpoint for team milky-hill
     path('accounts/', include('django.contrib.auth.urls')),  # Adds login/logout URLs
     path('api/auth/csrf/', get_csrf_token, name='csrf-token'),
     path('api/auth/login/', login_view, name='login'),
