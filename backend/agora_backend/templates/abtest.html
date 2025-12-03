@@ -4,6 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>A/B Test - Team Page</title>
+    
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-725FXLYK55"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        // Initialize GA4 with your measurement ID
+        gtag('config', 'G-725FXLYK55', {
+            'page_title': 'A/B Test Page',
+            'page_path': '/1317cca'
+        });
+        
+        // Track the variant shown to the user
+        gtag('event', 'ab_test_view', {
+            'event_category': 'A/B Test',
+            'event_label': 'Variant {{ variant }}',
+            'variant': '{{ variant }}',
+            'button_text': '{{ button_text }}'
+        });
+    </script>
+    
     <style>
         * {
             margin: 0;
@@ -143,10 +166,17 @@
     </div>
     
     <script>
-        // Optional: Add click tracking
+        // Track button clicks with variant and button text
         document.getElementById('abtest').addEventListener('click', function() {
+            // Send click event to Google Analytics
+            gtag('event', 'button_click', {
+                'event_category': 'A/B Test',
+                'event_label': 'Variant {{ variant }}',
+                'variant': '{{ variant }}',
+                'button_text': '{{ button_text }}'
+            });
+            
             console.log('Button clicked! Variant: {{ variant }}, Text: {{ button_text }}');
-            // You could send this data to analytics here
             alert('Button clicked! Text: {{ button_text }}');
         });
     </script>
