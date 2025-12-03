@@ -53,9 +53,10 @@ function AppContent() {
       .finally(() => setAuthChecked(true));
   }, []);
 
-  // Render A/B test directly without landing/auth checks
+  // Redirect A/B test deep link to backend endpoint to avoid frontend 404s
   if (location.pathname === '/1317cca') {
-    return <ABTest />;
+    window.location.href = 'https://agora-backend-vavf.onrender.com/1317cca/';
+    return null;
   }
 
   if (showLanding) {
