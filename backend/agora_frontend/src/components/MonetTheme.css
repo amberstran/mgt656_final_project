@@ -1,0 +1,41 @@
+.monet-root { font-family: Inter, Lato, system-ui, -apple-system, sans-serif; color: #243044; }
+
+/* Background canvas: soft watercolor gradients with faint texture */
+.monet-bg {
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(211, 196, 255, 0.40) 0%, rgba(211, 196, 255, 0) 60%),
+              radial-gradient(900px 500px at 80% 30%, rgba(179, 212, 243, 0.40) 0%, rgba(179, 212, 243, 0) 60%),
+              radial-gradient(700px 500px at 40% 80%, rgba(220, 234, 255, 0.35) 0%, rgba(220, 234, 255, 0) 65%),
+              linear-gradient(180deg, #b3d4f3 0%, #dceaff 100%);
+}
+
+.monet-bg::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-radial-gradient(circle at 30% 20%, rgba(255,255,255,0.06) 0 2px, rgba(0,0,0,0) 3px 10px);
+  pointer-events: none;
+}
+
+/* Floating card style */
+.monet-card { border-radius: 16px; background: rgba(255,255,255,0.75); backdrop-filter: blur(8px) saturate(1.05); box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1px solid rgba(255,255,255,0.35); }
+.monet-card--pad { padding: 1.25rem 1.5rem; }
+
+/* Soft header */
+.monet-header { border-radius: 16px; padding: 1rem 1.25rem; background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(245,250,255,0.70)); box-shadow: 0 6px 16px rgba(0,0,0,0.08); }
+.monet-header-title { font-weight: 700; letter-spacing: 0.06em; color: #2c3850; }
+.monet-header-sub { font-weight: 400; opacity: 0.85; color: #4a5a78; }
+
+/* Gentle button */
+.monet-btn { border: none; border-radius: 14px; padding: 0.8rem 1.2rem; font-weight: 600; letter-spacing: 0.02em; cursor: pointer; color: #23324a; background: linear-gradient(180deg, #ffffff, #eef5ff); box-shadow: 0 4px 12px rgba(0,0,0,0.08); transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease; }
+.monet-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.10); filter: brightness(1.04); }
+.monet-btn--primary { background: linear-gradient(180deg, #c1d6ff, #e7f0ff); color: #1f3070; }
+
+/* Tagline badge */
+.monet-badge { display: inline-block; border-radius: 14px; padding: 0.6rem 1rem; background: rgba(255,255,255,0.85); color: #2b3954; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+
+/* Icon circle */
+.monet-icon { width: 140px; height: 140px; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 32px; color: #ffffff; background: radial-gradient(90px 90px at 50% 40%, #7ea8ff 0%, #5f84db 100%); box-shadow: 0 12px 28px rgba(126, 168, 255, 0.25), inset 0 6px 18px rgba(255,255,255,0.35); border: 1px solid rgba(255,255,255,0.45); }
+
+/* Title + sub */
+.monet-title { font-size: 2.25rem; font-weight: 800; letter-spacing: 0.10em; color: #2c3850; text-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+.monet-sub { font-size: 1rem; color: #4a5a78; opacity: 0.9; }

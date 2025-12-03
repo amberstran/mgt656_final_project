@@ -1,0 +1,43 @@
+.glassy-btn { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.9rem 1.6rem; border-radius: 9999px; border: 1.5px solid rgba(255,255,255,0.7); color: #2d2357; /* deep lavender for contrast */ background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(240,248,255,0.16)); box-shadow: 0 6px 18px rgba(0,0,0,0.12), inset 0 1px 8px rgba(255,255,255,0.35); backdrop-filter: blur(8px) saturate(1.08); -webkit-backdrop-filter: blur(8px) saturate(1.08); cursor: pointer; transition: transform 180ms ease, box-shadow 200ms ease, filter 200ms ease; }
+.glassy-btn::before { content: ""; position: absolute; inset: 1px; border-radius: inherit; background: radial-gradient(120% 120% at 20% 0%, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0) 40%), radial-gradient(120% 120% at 80% 100%, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0) 40%); pointer-events: none; mix-blend-mode: screen; }
+.glassy-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 24px rgba(0,0,0,0.16), inset 0 1px 10px rgba(255,255,255,0.40); filter: brightness(1.02); }
+.glassy-btn:active { transform: translateY(0px); box-shadow: 0 6px 18px rgba(0,0,0,0.14), inset 0 1px 6px rgba(255,255,255,0.35); }
+.glassy-btn .arrow { opacity: 0.9; color: #2d2357; }
+
+/* Optional darker text variant */
+.glassy-btn--dark { color: #1f1f2b; }
+
+/* Wrapper provides pulsing glow on hover and holds cursor swarm */
+.glassy-btn-wrap { position: relative; display: inline-block; }
+.glassy-btn-wrap.is-hovered .glassy-btn { animation: pulseGlow 900ms ease-in-out infinite alternate; }
+@keyframes pulseGlow {
+	0% { box-shadow: 0 6px 18px rgba(126, 168, 255, 0.14), 0 0 0 0 rgba(126, 168, 255, 0.12), inset 0 1px 8px rgba(255,255,255,0.35); }
+	100% { box-shadow: 0 10px 26px rgba(126, 168, 255, 0.22), 0 0 0 6px rgba(126, 168, 255, 0.10), inset 0 1px 10px rgba(255,255,255,0.42); }
+}
+
+/* Cursor swarm ring positioned around button center */
+.cursor-swarm { position: absolute; left: 50%; top: 50%; width: 0; height: 0; pointer-events: none; }
+
+/* Individual cursor sprite: flies in to ring and orients toward center */
+.cursor-sprite { position: absolute; width: 20px; height: 20px; transform: translate(-50%, -50%) translate(0px, 0px) rotate(var(--rot)); opacity: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15)); }
+.glassy-btn-wrap.is-hovered .cursor-sprite { animation: flyIn 420ms ease-out forwards; }
+@keyframes flyIn {
+	0% { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) rotate(var(--rot)); opacity: 0; }
+	60% { transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.9), calc(var(--ty) * 0.9)) rotate(var(--rot)); opacity: 0.95; }
+	100% { transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot)); opacity: 1; }
+}
+
+/* After fly-in completes, rotate the entire cursor ring as a group */
+.glassy-btn-wrap.is-hovered .cursor-swarm { animation: rotateRing 8s linear infinite; transform-origin: center; }
+@keyframes rotateRing {
+	0% { transform: translate(-50%, -50%) rotate(0deg); }
+	100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Cursor shape: angled triangle with subtle trail using ::after */
+.cursor-shape { position: relative; width: 100%; height: 100%; }
+.cursor-shape::before { content: ""; position: absolute; left: 6px; top: 2px; width: 0; height: 0; border-left: 10px solid rgba(255, 255, 255, 0.95); border-top: 6px solid transparent; border-bottom: 6px solid transparent; border-radius: 2px; }
+.cursor-shape::after { content: ""; position: absolute; left: -14px; top: 6px; width: 16px; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgba(255,255,255,0.0), rgba(255,255,255,0.55)); filter: blur(0.6px); opacity: 0.9; }
+
+/* Speed-up re-entry on subsequent hovers */
+.glassy-btn-wrap .cursor-sprite { will-change: transform, opacity; }
