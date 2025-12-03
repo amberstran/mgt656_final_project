@@ -9,7 +9,7 @@ import axios from 'axios';
 import CirclesPanel from './components/CirclesPanel';
 import BackButton from './components/BackButton';
 import AuthDebug from './components/AuthDebug';
-import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import Signup from './components/Signup';
 import Profile from './components/Profile';
 import UserMenu from './components/UserMenu';
@@ -17,6 +17,7 @@ import ABTest from './components/ABTest';
 
 function AppContent() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [showLogin, setShowLogin] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthed, setIsAuthed] = useState(false);
@@ -52,6 +53,11 @@ function AppContent() {
       .finally(() => setAuthChecked(true));
   }, []);
 
+  // Render A/B test directly without landing/auth checks
+  if (location.pathname === '/1317cca') {
+    return <ABTest />;
+  }
+
   if (showLanding) {
     return <Landing onEnter={() => setShowLanding(false)} />;
   }
@@ -66,7 +72,6 @@ function AppContent() {
       <Routes>
         <Route path="/signup" element={<Signup />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/1317cca" element={<ABTest />} />
         <Route path="/" element={
           <>
             <div className="agora-header">
