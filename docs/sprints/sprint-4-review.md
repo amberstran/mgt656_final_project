@@ -132,27 +132,58 @@ We may selectively include some of these features based on time and priority dur
 
 ---
 
-## **7. Readiness for Final Submission**
+## 7.Readiness for Final Submission
 
-### **Ready**
+### ✅ What’s Complete
+- Production deployment fully live (Frontend + Backend + PostgreSQL)
+- Authentication, user profiles, posting, commenting, liking, reporting
+- A/B test endpoint implemented (KUDOS / THANKS variants)
+- GA4 analytics integrated with custom events and dimensions
+- Core system stable and ready for demonstration
 
-* Deployment infrastructure
-* Authentication + profiles
-* Posting + interactions
-* A/B testing framework
-* Analytics
+---
 
-### **To Be Completed**
+### 📝 What Remains for the Next 9 Days
+We may selectively implement 1–2 additional MVP features depending on feasibility:
 
-* Leave Circle
-* View Circle Chat
-* Search Posts
-* Final UX polishing
-* Optional UI consistency improvements
+- Leave Circle  
+- View Circle Chat  
+- Admin Moderation  
+- Search Posts  
 
-### **Overall Readiness:**
+Additional tasks:
+- Minor UI polish  
+- Final testing and bug fixes  
+- Clean up debug components
 
-🟡 **Partially Ready – Core system complete, with the option to selectively incorporate additional MVP features (a small number of SP) based on time and priority during the Final Submission Period**
+---
+
+### ⚠️ Risks & Mitigation
+
+#### **1. Limited Time**
+- Only implement small, low-risk features  
+- Prioritize Leave Circle / basic admin tools  
+
+#### **2. Cookie / Session Reliability in Production**
+- Re-test login persistence across browsers  
+- Adjust Render domain settings if issues arise  
+
+#### **3. Analytics Consistency**
+- Verify GA4 event logs before demo  
+- Use DebugView to confirm variant tracking  
+
+#### **4. Regression Risk from New Features**
+- Freeze core system early in the week  
+- Implement new features in separate branches  
+- Run quick manual regression tests before merging
+
+---
+
+## 🟡 Overall Readiness
+Core system is complete and production-ready.  
+Additional MVP features will be added selectively based on remaining time and priority.
+
+
 
 ---
 
