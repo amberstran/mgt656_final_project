@@ -1,0 +1,38 @@
+# Ruff configuration file
+# For more details, see: https://docs.astral.sh/ruff/configuration/
+
+# General settings
+line-length = 120
+target-version = "py311"
+
+[lint]
+# Enable all rules from Pycodestyle (E, W), Pyflakes (F), and isort (I)
+select = [
+    "E",    # Pycodestyle errors
+    "W",    # Pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+]
+
+# Ignore specific rules (Django compatibility)
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "E203",  # Whitespace before ':'
+]
+
+# Allow unused variables if prefixed with underscore
+dummy-variable-rgx = "^_[a-z0-9]*$"
+
+[lint.isort]
+# Treat Django as a known first-party module
+known-first-party = ["agora_backend", "core"]
+known-third-party = ["django", "rest_framework", "corsheaders"]
+
+[format]
+# Use double quotes for strings
+quote-style = "double"
+# Preserve raw string quotes
+skip-magic-trailing-comma = false

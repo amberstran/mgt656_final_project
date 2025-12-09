@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser, Post, Comment, Like, Circle, CircleMembership, Message, Report
+
+from .models import Circle, CircleMembership, Comment, CustomUser, Like, Message, Post, Report
 
 admin.site.register(CustomUser, UserAdmin)
 admin.site.register(Post)

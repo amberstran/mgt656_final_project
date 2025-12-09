@@ -1,4 +1,4 @@
-from django.db import migrations, connection
+from django.db import migrations
 
 
 def ensure_columns(apps, schema_editor):
