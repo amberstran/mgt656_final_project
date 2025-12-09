@@ -1,18 +1,19 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import path, include
 from django.http import HttpResponse, HttpResponseRedirect
-from django.urls import reverse
-from rest_framework.routers import DefaultRouter
+from django.urls import include, path, reverse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.routers import DefaultRouter
+
+from backend.core.models import Comment, Post, Report
 from backend.core.views import PostViewSet
-from .auth_views import login_view, logout_view, get_csrf_token, me_view, debug_cookies_view, health_view, register_view
+
 from .abtest_views import abtest_view
-from django.conf import settings
-from django.conf.urls.static import static
-from rest_framework import status
-from backend.core.models import Report, Post, Comment
+from .auth_views import debug_cookies_view, get_csrf_token, health_view, login_view, logout_view, me_view, register_view
+
 
 @api_view(['POST'])
 @permission_classes([AllowAny])

@@ -1,6 +1,5 @@
 from rest_framework import generics, pagination
-from rest_framework.response import Response
-from django.utils import timezone
+
 from .models import Post
 from .serializers import PostSerializer
 

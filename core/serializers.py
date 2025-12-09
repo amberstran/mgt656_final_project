@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from .models import Post, Comment, Like
+
+from .models import Comment, Post
 
 
 class UserLiteSerializer(serializers.Serializer):
@@ -67,6 +68,6 @@ class PostSerializer(serializers.ModelSerializer):
         try:
             top_level_comments = obj.comments.filter(parent=None).order_by('-created_at')
             return CommentSerializer(top_level_comments, many=True, context=self.context).data
-        except Exception as e:
+        except Exception:
             # Fallback to empty list if there's an error
             return []

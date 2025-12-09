@@ -1,18 +1,19 @@
 # core/views.py - Merged: Personal profile + Posts API
-from django.shortcuts import render
-import logging, traceback
-from django.contrib.auth.decorators import login_required
-from django.http import HttpResponseRedirect
-from django.conf import settings
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from django.db.models import Count
+import logging
+import traceback
 
-from .models import Post, Like, Comment, CircleMembership
-from django.db.models import Q
-from .serializers import PostSerializer, CommentSerializer
+from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q
+from django.http import HttpResponseRedirect
+from django.shortcuts import render
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
+
+from .models import CircleMembership, Like, Post
+from .serializers import CommentSerializer, PostSerializer
 
 # Personal Profile Feature
 LEVELS = [
