@@ -1,0 +1,45 @@
+[tool.ruff]
+# Set the line length to 120 characters
+line-length = 120
+
+# Target Python version
+target-version = "py311"
+
+# Include all Python files
+include = ["*.py"]
+
+[tool.ruff.lint]
+# Enable all rules from Pycodestyle (E, W), Pyflakes (F), and isort (I)
+select = [
+    "E",    # Pycodestyle errors
+    "W",    # Pycodestyle warnings
+    "F",    # Pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear
+]
+
+# Ignore specific rules (Django compatibility)
+ignore = [
+    "E501",  # Line too long (handled by formatter)
+    "E203",  # Whitespace before ':'
+    "W503",  # Line break before binary operator
+    "N806",  # Variable name should be lowercase
+    "N802",  # Function name should be lowercase
+]
+
+# Allow unused variables if prefixed with underscore
+dummy-variable-prefixes = ["_"]
+
+[tool.ruff.format]
+# Use double quotes for strings
+quote-style = "double"
+# Preserve raw string quotes
+skip-magic-trailing-comma = false
+
+[tool.ruff.isort]
+# Treat Django as a known first-party module
+known-first-party = ["agora_backend", "core"]
+known-django = ["django"]
+sections = ["FUTURE", "STDLIB", "DJANGO", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
