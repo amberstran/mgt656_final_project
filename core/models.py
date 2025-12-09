@@ -1,7 +1,8 @@
 # core/models.py
 from django.conf import settings
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
 
 # Optional: Custom user if you need extra fields
 class CustomUser(AbstractUser):
@@ -45,7 +46,7 @@ class Comment(models.Model):
     parent = models.ForeignKey('self', null=True, blank=True, on_delete=models.CASCADE, related_name='replies')
 
     def __str__(self):
-        return f"Comment by {'Anonymous' if self.is_anonymous else self.user}" 
+        return f"Comment by {'Anonymous' if self.is_anonymous else self.user}"
 
 
 class Like(models.Model):

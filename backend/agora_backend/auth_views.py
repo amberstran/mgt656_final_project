@@ -1,17 +1,17 @@
-from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth import get_user_model
+from django.conf import settings
+from django.contrib.auth import authenticate, get_user_model, login, logout
 from django.middleware.csrf import get_token
+from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import status
-from django.conf import settings
+
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def get_csrf_token(request):
-    """Get CSRF token for the frontend
-    
+    """Get CSRF token for the frontend.
+
     This endpoint ensures the CSRF cookie is set and returns the token value.
     The get_token() call will set the cookie if it doesn't exist.
     """
@@ -19,7 +19,6 @@ def get_csrf_token(request):
     response = Response({'csrfToken': token})
     # Explicitly ensure the cookie is set with proper attributes
     if not request.COOKIES.get('csrftoken'):
-        from django.middleware.csrf import _get_new_csrf_token
         response.set_cookie(
             'csrftoken',
             token,
@@ -35,17 +34,17 @@ def get_csrf_token(request):
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
-    
+
     if not username or not password:
         return Response({'detail': 'Username and password required'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
     user = authenticate(request, username=username, password=password)
     if user is not None:
         login(request, user)
         # Get CSRF token after login
         token = get_token(request)
         return Response({
-            'detail': 'Login successful', 
+            'detail': 'Login successful',
             'user': {'id': user.id, 'username': user.username},
             'csrfToken': token
         })
@@ -71,12 +70,12 @@ def register_view(request):
 
     Returns 201 with basic user info on success.
     """
-    User = get_user_model()
+    user_model = get_user_model()
     username = (request.data.get('username') or '').strip()
     password = request.data.get('password') or ''
     if not username or not password:
         return Response({'detail': 'Username and password required'}, status=400)
-    if User.objects.filter(username=username).exists():
+    if user_model.objects.filter(username=username).exists():
         return Response({'detail': 'Username already taken'}, status=409)
 
     # Optional profile fields
@@ -85,7 +84,7 @@ def register_view(request):
         val = request.data.get(key)
         if isinstance(val, str):
             fields[key] = val.strip()
-    
+
     # Provide defaults for database fields that might be required but not in model
     fields.setdefault('netid', username)  # Use username as netid if not provided
     fields.setdefault('display_name', username)  # Use username as display_name
@@ -95,7 +94,7 @@ def register_view(request):
     fields.setdefault('program', '')  # Empty string if not provided
     fields.setdefault('grade', '')  # Empty string if not provided
 
-    user = User.objects.create_user(username=username, password=password, **fields)
+    user = user_model.objects.create_user(username=username, password=password, **fields)
     # Optionally auto-login new user for smoother UX
     login(request, user)
     token = get_token(request)

@@ -1,8 +1,9 @@
 # core/models.py
-from django.db import models
-from django.conf import settings
 import bleach
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.db import models
+
 
 class CustomUser(AbstractUser):
     """Custom user model for Agora"""
@@ -12,7 +13,7 @@ class CustomUser(AbstractUser):
     school = models.CharField(max_length=100, default='')
     year = models.CharField(max_length=10, default='')
     is_verified = models.BooleanField(default=False)
-    
+
     # Profile fields
     bio = models.TextField(blank=True)
     avatar = models.URLField(blank=True)
@@ -20,11 +21,11 @@ class CustomUser(AbstractUser):
     grade = models.CharField(max_length=20, blank=True, verbose_name="Grade/Year")
     # When True, user's posts/comments will show their real name by default.
     post_with_real_name = models.BooleanField(default=False)
-    
+
     class Meta:
         verbose_name = 'Custom User'
         verbose_name_plural = 'Custom Users'
-    
+
     def save(self, *args, **kwargs):
         # Sanitize user-provided bio to strip any potentially harmful HTML.
         # We intentionally keep the whitelist empty to avoid rendering raw HTML.

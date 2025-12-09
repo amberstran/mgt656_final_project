@@ -1,9 +1,8 @@
-from django.test import TestCase
-from django.urls import reverse
-from rest_framework.test import APIClient
 from django.contrib.auth import get_user_model
-from core.models import Circle, CircleMembership, Post
+from django.test import TestCase
+from rest_framework.test import APIClient
 
+from core.models import Circle, CircleMembership, Post
 
 User = get_user_model()
 
@@ -39,7 +38,7 @@ class CirclesAPITest(TestCase):
     def test_post_visibility_and_creation_requires_membership(self):
         # Create membership for member and a post in the circle by that member
         CircleMembership.objects.create(user=self.user_member, circle=self.circle)
-        post = Post.objects.create(user=self.user_member, title='Hello', content='World', is_anonymous=False, circle=self.circle)
+        Post.objects.create(user=self.user_member, title='Hello', content='World', is_anonymous=False, circle=self.circle)
 
         # Non-member should not see circle posts
         self.client.force_authenticate(self.user_non)

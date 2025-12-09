@@ -1,25 +1,27 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required  # retained for future gated views (not used for public profile now)
-from django.http import JsonResponse
-from django.contrib.auth import get_user_model, login
-from django.core.mail import send_mail
-from django.contrib.auth.tokens import default_token_generator
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from django.utils.encoding import force_bytes, force_str
 from django.conf import settings
+from django.contrib.auth import get_user_model, login
+from django.contrib.auth.decorators import (
+        login_required,  # retained for future gated views (not used for public profile now)
+)
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.db import IntegrityError
 from django.db.models import Count
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
 # DRF imports for Posts API
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.exceptions import PermissionDenied
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.response import Response
 
-from .models import Post, Comment, Like
-from .serializers import PostSerializer, CommentSerializer
+from .models import Comment, Like, Post
+from .serializers import CommentSerializer, PostSerializer
 
 """Profile-focused views only.
 
@@ -64,18 +66,18 @@ def profile_view(request):
         "comments": 4,
         "likes": 10,
     }
-    
+
     # Calculate Agora Sparks score
     score = stats["posts"] * 5 + stats["comments"] * 2 + stats["likes"]
     level = _calc_level(score)
-    
+
     # Add score and level to stats
     stats.update({
-        "score": score, 
-        "level_name": level["name"], 
+        "score": score,
+        "level_name": level["name"],
         "level_hint": level["hint"]
     })
-    
+
     return render(request, "profile.html", {"stats": stats})
 
 
@@ -99,18 +101,18 @@ def profile_api_view(request):
         "comments": 4,
         "likes": 10,
     }
-    
+
     # Calculate Agora Sparks score
     score = stats["posts"] * 5 + stats["comments"] * 2 + stats["likes"]
     level = _calc_level(score)
-    
+
     # Add score and level to stats
     stats.update({
-        "score": score, 
-        "level_name": level["name"], 
+        "score": score,
+        "level_name": level["name"],
         "level_hint": level["hint"]
     })
-    
+
     # If user is authenticated, include basic user info and preferences
     user_data = None
     if request.user and getattr(request.user, 'is_authenticated', False):
@@ -148,14 +150,14 @@ def _send_verification_email(user, email):
     """Send verification email with link to set password"""
     token = default_token_generator.make_token(user)
     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    
+
     verification_link = f"{settings.SITE_URL}/verify/{uid}/{token}/"
-    
+
     subject = "Verify Your Agora Account & Set Password"
     message = f"""
 Hello {user.username},
 
-Thank you for registering with Agora! 
+Thank you for registering with Agora!
 
 Please click the link below to verify your email and set your password:
 
@@ -166,27 +168,27 @@ This link will expire in 24 hours.
 Best regards,
 Agora Team
 """
-    
+
     html_message = f"""
 <html>
   <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
       <h2>Welcome to Agora!</h2>
-      
+
       <p>Hello <strong>{user.username}</strong>,</p>
-      
+
       <p>Thank you for registering. Please verify your Yale email and set your password:</p>
-      
-      <a href="{verification_link}" style="display: inline-block; padding: 12px 24px; background-color: #007aff; 
+
+      <a href="{verification_link}" style="display: inline-block; padding: 12px 24px; background-color: #007aff;
       color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">
         Verify Email & Set Password
       </a>
-      
+
       <p style="margin-top: 20px; font-size: 14px; color: #666;">
         Or copy and paste this link:<br>
         <code>{verification_link}</code>
       </p>
-      
+
       <p style="margin-top: 30px; font-size: 12px; color: #999;">
         This link expires in 24 hours.
       </p>
@@ -194,7 +196,7 @@ Agora Team
   </body>
 </html>
 """
-    
+
     try:
         send_mail(
             subject=subject,
@@ -242,7 +244,7 @@ def register_view(request):
         # Create inactive user (no password yet)
         try:
             user = User.objects.create_user(
-                username=username, 
+                username=username,
                 email=email,
                 password=None  # No password until verification
             )
@@ -261,7 +263,7 @@ def register_view(request):
 
         # Send verification email
         email_sent = _send_verification_email(user, email)
-        
+
         if email_sent:
             return render(request, 'register.html', {
                 'success': 'Registration successful! Check your Yale email to verify and set your password.',
@@ -283,41 +285,41 @@ def verify_email_view(request, uidb64, token):
         user = User.objects.get(pk=uid)
     except (TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
-    
+
     if user is None or not default_token_generator.check_token(user, token):
         return render(request, 'verify_email.html', {
             'error': 'Invalid or expired verification link',
         })
-    
+
     if request.method == 'POST':
         password = request.POST.get('password', '')
         password2 = request.POST.get('password2', '')
-        
+
         if not password:
             return render(request, 'verify_email.html', {
                 'error': 'Password is required',
                 'user': user,
             })
-        
+
         if password != password2:
             return render(request, 'verify_email.html', {
                 'error': 'Passwords do not match',
                 'user': user,
             })
-        
+
         # Set password and activate user
         user.set_password(password)
         user.is_active = True
         user.save()
-        
+
         # Auto-login
         login(request, user, backend='django.contrib.auth.backends.ModelBackend')
-        
+
         return render(request, 'verify_email.html', {
             'success': True,
             'user': user,
         })
-    
+
     return render(request, 'verify_email.html', {'user': user})
 
 
