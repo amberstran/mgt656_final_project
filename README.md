@@ -326,18 +326,31 @@ Agora demonstrates the team's ability to execute a full-stack software project u
 
 # 🔗 **Project Links**
 
-1. **GitHub Repository:**
-   [https://github.com/amberstran/mgt656_final_project](https://github.com/amberstran/mgt656_final_project)
 
-2. **GitHub Project Board:**
-   [https://github.com/users/amberstran/projects/2](https://github.com/users/amberstran/projects/2)
+### 🗂️ Repository & Project Management
+1. **GitHub Repository:**  
+   https://github.com/amberstran/mgt656_final_project
 
-3. **Frontend (Render Deployment):**
-   [https://agora-frontend-16kz.onrender.com/](https://agora-frontend-16kz.onrender.com/)
+2. **GitHub Project Board:**  
+   https://github.com/users/amberstran/projects/2
 
-4. **Backend (Render Deployment):**
-   [https://agora-backend-vavf.onrender.com/](https://agora-backend-vavf.onrender.com/)
+---
 
-5. **A/B Test Site:**
-   [https://agora-frontend-16kz.onrender.com/1317cca/](https://agora-frontend-16kz.onrender.com/1317cca/)
+### 🚀 Production Deployment
+3. **Production Frontend:**  
+   https://agora-frontend-16kz.onrender.com/
 
+4. **Production Backend:**  
+   https://agora-backend-vavf.onrender.com/
+
+5. **A/B Test Site:**  
+   https://agora-frontend-16kz.onrender.com/1317cca/
+
+---
+
+### 🧪 Staging Environment
+6. **Staging Frontend:**  
+   https://agora-staging-frontend.onrender.com/
+
+7. **Staging Backend:**  
+   https://agora-staging-backend.onrender.com/
