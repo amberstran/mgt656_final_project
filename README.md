@@ -1,513 +1,343 @@
-# 🚀 Agora Yale - Complete Setup & Deployment Guide
+# 📋 **MGT656 Final Project – Comprehensive Report**
 
-Welcome to **Agora**, a community discussion platform built for Yale University.
+**Project:** Agora Yale – Community Discussion Platform <br>
+**Team:** Amber Tran, Ameesha Masand, Yiru Li
 
-## ⚡ Quick Start (30 seconds)
+---
+
+# 🧠 **1. Project Description & Problem Being Solved**
+
+### 📘 Project Description
+
+Agora is a lightweight, community-centered discussion platform built specifically for Yale graduate and professional students. Its purpose is to offer one unified, welcoming digital space where students can share experiences, ask questions, and connect beyond the boundaries of their individual schools or programs.
+
+Today, student communication is spread across numerous channels—GroupMe, WeChat, WhatsApp, and program-specific mailing lists. These platforms function independently, creating isolated pockets of information that are difficult to search and nearly impossible to navigate collectively. Agora addresses this fragmentation by consolidating conversations into a single platform designed for simplicity and accessibility.
+
+The system allows users to create posts, upload images, participate in comment threads, and browse topics shared by peers across the graduate community. Registration is intentionally restricted to Yale graduate students through a simple `@yale.edu` email check, ensuring a focused and relevant environment for campus-specific discussions.
+
+At its core, Agora is designed to foster a stronger sense of belonging and help students naturally form their own circles within Yale’s diverse academic landscape. By creating a central space for dialogue and connection, the platform supports the everyday interactions that shape student community life. 
+
+🪐 This vision also highlights a broader challenge: Yale graduate students currently lack a unified, accessible environment for campus-wide communication — a gap that Agora aims to address.
+
+## 💡 Solution: Agora Yale
+
+**Agora** is a lightweight, Yale-focused discussion platform designed to centralize student conversations in a clean, searchable environment.
+
+It allows students to:
+
+* 📝 **Create posts**, including **image uploads**
+* 💬 **Comment** on posts
+* 👤 **Register using Yale email addresses** (simple `@yale.edu` check)
+* 📄 **View basic user profiles**
+* 🎨 **Browse a unified, clean UI** with consistent styling
+* 🔁 **Interact with an A/B test variation page** created for experimentation
+
+
+
+# 🚀 **2. Setup Instructions (Local Development)**
+
+## 🖥️ Prerequisites
+
+* Python 3.9+
+* Node.js 16+
+* npm or yarn
+* Git
+
+---
+
+## ⚡ Option 1 — Automated Setup (Recommended)
 
 ### macOS / Linux
+
 ```bash
+cd mgt656_final_project/mgt656_final_project
 bash START.sh
 ```
 
 ### Windows
+
 ```bash
+cd mgt656_final_project\mgt656_final_project
 START.bat
 ```
 
-That's it! The application will:
-- ✅ Setup Python virtual environment
-- ✅ Install all dependencies
-- ✅ Configure database
-- ✅ Start Django backend (port 8000)
-- ✅ Start React frontend (port 3000)
+This script:
 
-Then visit: **http://localhost:3000**
+* Creates virtual environment
+* Installs Python and Node dependencies
+* Initializes SQLite database
+* Starts Django backend (8000)
+* Starts React frontend (3000)
 
----
-
-## 📋 What's Included
-
-### Backend (Django)
-- ✅ User authentication
-- ✅ User profile with Agora Sparks system
-- ✅ Email-based NetID verification
-- ✅ Profile statistics and user levels
-- ✅ REST API endpoints
-- ✅ Admin panel
-
-### Frontend (React)
-- ✅ User profile page
-- ✅ Email verification form
-- ✅ Responsive design
-- ✅ Real-time data from API
-
-### Features
-- ✅ Yale email verification (@yale.edu only)
-- ✅ Token-based email confirmation
-- ✅ Agora Sparks scoring system (5 levels)
-- ✅ Profile statistics
-- ✅ Professional UI
+Visit: **[http://localhost:3000](http://localhost:3000)**
 
 ---
 
-## 🛠️ Setup Options
-
-### Option 1: Full Startup (Both Services)
-```bash
-bash START.sh          # macOS/Linux
-START.bat              # Windows
-```
-Starts backend (port 8000) and frontend (port 3000) simultaneously.
-
-### Option 2: Backend Only
-```bash
-bash START.sh backend          # macOS/Linux
-START.bat backend              # Windows
-```
-Only Django backend. Access admin at: http://localhost:8000/admin
-
-### Option 3: Frontend Only
-```bash
-bash START.sh frontend         # macOS/Linux
-START.bat frontend             # Windows
-```
-Only React app. Requires backend running separately.
-
-### Option 4: Database Setup Only
-```bash
-bash START.sh db-setup         # macOS/Linux
-START.bat db-setup             # Windows
-```
-Initialize database and create admin user.
-
-### Option 5: Full Setup Without Starting
-```bash
-bash START.sh setup            # macOS/Linux
-START.bat setup                # Windows
-```
-Setup everything but don't start services.
-
----
-
-## 📍 URLs & Endpoints
-
-### Frontend
-- 🌐 **Main App:** http://localhost:3000
-- 👤 **Profile:** http://localhost:3000/profile
-- ✉️ **Email Verify:** http://localhost:3000/email-verify
-
-### Backend (Django)
-- 🏠 **Homepage:** http://localhost:8000
-- 🎯 **Profile:** http://localhost:8000/profile/
-- ✉️ **Email Verify:** http://localhost:8000/email-verify/
-- 📊 **API Profile:** http://localhost:8000/api/profile/
-- 📧 **API Email:** http://localhost:8000/api/email-verify/
-- 🔧 **Admin Panel:** http://localhost:8000/admin/
-
----
-
-## 🔑 Default Credentials
-
-**Admin Account:**
-- 👤 Username: `admin`
-- 🔐 Password: `admin`
-
-Login at: http://localhost:8000/admin
-
----
-
-## ⚙️ Configuration
-
-### Email Settings
-
-Email verification requires configuration. See `.env.example` for options:
-
-#### Development (Print to Console)
-```
-EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
-```
-Emails will print to Django console - perfect for testing!
-
-#### Production (Gmail SMTP)
-```
-EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-specific-password
-```
-
-**For Gmail:**
-1. Enable 2-factor authentication
-2. Generate [App Password](https://myaccount.google.com/apppasswords)
-3. Use app password in `.env`
-
-See `EMAIL_VERIFICATION_SETUP.md` for more providers (SendGrid, AWS SES, etc.)
-
-### Database
-
-**Development:** SQLite (auto-created)
-**Production:** PostgreSQL (configure in `.env`)
-
----
-
-## 📁 Project Structure
-
-```
-mgt656_final_project/
-├── backend/                          # Django project
-│   ├── manage.py                     # Django CLI
-│   ├── db.sqlite3                    # Development database
-│   ├── agora_backend/                # Main Django app
-│   │   ├── settings.py               # Configuration
-│   │   ├── urls.py                   # URL routing
-│   │   └── templates/                # HTML templates
-│   ├── agora_frontend/               # React app
-│   │   ├── package.json              # React dependencies
-│   │   ├── public/                   # Static files
-│   │   └── src/                      # React components
-│   └── core/                         # Core app
-│       ├── models.py                 # Database models
-│       ├── views.py                  # View logic
-│       ├── urls.py                   # App URLs
-│       └── admin.py                  # Admin config
-├── frontend/                         # Standalone frontend
-├── requirements.txt                  # Python dependencies
-├── .env.example                      # Environment template
-├── START.sh                          # macOS/Linux startup
-├── START.bat                         # Windows startup
-└── README.md                         # This file
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Port Already in Use
-
-**Port 8000 (Django):**
-```bash
-# macOS/Linux
-lsof -ti:8000 | xargs kill -9
-
-# Windows
-netstat -ano | findstr :8000
-taskkill /PID [PID] /F
-```
-
-**Port 3000 (React):**
-```bash
-# macOS/Linux
-lsof -ti:3000 | xargs kill -9
-
-# Windows
-netstat -ano | findstr :3000
-taskkill /PID [PID] /F
-```
-
-### Python Not Found
-
-Install Python 3.8+:
-- macOS: `brew install python3`
-- Linux: `sudo apt-get install python3 python3-pip`
-- Windows: https://www.python.org/downloads/
-
-### Node.js Not Found
-
-Install Node.js:
-- https://nodejs.org/ (LTS recommended)
-
-### Database Issues
-
-Reset database:
-```bash
-# macOS/Linux
-rm backend/db.sqlite3
-bash START.sh db-setup
-
-# Windows
-del backend\db.sqlite3
-START.bat db-setup
-```
-
-### Email Not Sending
-
-1. Check `.env` file exists and is configured
-2. For Gmail, verify app-specific password is set
-3. Check port 587 is not blocked by firewall
-4. Review Django logs in console output
-
-### React Not Loading
-
-1. Ensure backend is running (Django server on port 8000)
-2. Check React dependencies installed: `npm install`
-3. Try clearing cache: `bash START.sh clean`
-
-### CORS or API Errors
-
-Ensure backend is running. React connects to:
-```
-http://localhost:8000/api/profile/
-http://localhost:8000/api/email-verify/
-```
-
----
-
-## 📚 Documentation
-
-### Core Features
-- **`PROFILE_IMPLEMENTATION_GUIDE.md`** - User profile system
-- **`README_PROFILE.md`** - Profile feature overview
-- **`NETID_EMAIL_VERIFICATION.md`** - Email verification details
-
-### Email Configuration
-- **`EMAIL_VERIFICATION_SETUP.md`** - Complete email setup guide (9+ providers)
-- **`EMAIL_VERIFICATION_QUICK_START.md`** - Quick reference
-- **`EMAIL_VERIFICATION_IMPLEMENTATION.md`** - Implementation details
-
-### Setup & Deployment
-- **`POSTGRESQL_SETUP.md`** - PostgreSQL configuration
-- **`QUICK_REFERENCE.md`** - Command reference
-- **`.env.example`** - Environment variables template
-
----
-
-## 🧪 Testing
-
-### Manual Testing
-
-1. **Access the app:**
-   ```
-   http://localhost:3000
-   ```
-
-2. **Login to admin:**
-   ```
-   http://localhost:8000/admin
-   Username: admin
-   Password: admin
-   ```
-
-3. **Test profile page:**
-   ```
-   http://localhost:3000/profile
-   or
-   http://localhost:8000/profile/
-   ```
-
-4. **Test email verification:**
-   - Visit http://localhost:8000/email-verify/
-   - Submit email: testuser@yale.edu
-   - Check Django console for verification link
-   - Click link to confirm
-
-### Django Shell
+## 🔧 Option 2 — Manual Backend Setup
 
 ```bash
 cd backend
-python manage.py shell
-```
+python3 -m venv venv
+source venv/bin/activate        # macOS/Linux
+# venv\Scripts\activate        # Windows
 
-```python
-# List users
-from django.contrib.auth import get_user_model
-User = get_user_model()
-User.objects.all()
-
-# Check verification status
-user = User.objects.get(username='admin')
-print(user.email, user.is_verified)
-
-# Create test user
-User.objects.create_user(
-    username='testuser',
-    email='testuser@yale.edu',
-    password='testpass123'
-)
+pip install -r ../requirements.txt
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver 0.0.0.0:8000
 ```
 
 ---
 
-## 🚀 Deployment
+## 🎨 Manual Frontend Setup
 
-### Heroku / Cloud Platforms
-
-1. **Set environment variables:**
-   ```
-   SITE_URL=https://your-domain.com
-   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-   EMAIL_HOST_USER=your-email@gmail.com
-   EMAIL_HOST_PASSWORD=your-app-password
-   SECRET_KEY=your-secure-secret-key
-   DEBUG=False
-   DATABASE_URL=postgresql://...
-   ```
-
-2. **Deploy:**
-   - Push to repository
-   - Platform builds and runs
-
-3. **Verify:**
-   - Test all endpoints
-   - Check email sending
-   - Review logs
-
-### Docker
-
-```dockerfile
-FROM python:3.11
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["gunicorn", "agora_backend.wsgi:application", "--bind", "0.0.0.0:8000"]
-```
-
-```bash
-docker build -t agora .
-docker run -p 8000:8000 agora
-```
-
----
-
-## 📊 Architecture
-
-```
-┌─────────────────────┐
-│   React Frontend    │
-│ (http://localhost:3000)
-└──────────┬──────────┘
-           │
-           ▼ API Calls
-┌─────────────────────┐       ┌──────────────┐
-│  Django Backend     │◄─────►│   Database   │
-│ (http://localhost:8000)     │   SQLite     │
-└──────────┬──────────┘       └──────────────┘
-           │
-           ▼ Email
-    ┌─────────────┐
-    │ SMTP Server │
-    │  (Gmail)    │
-    └─────────────┘
-```
-
----
-
-## 🔐 Security Checklist
-
-- [ ] Change default admin password
-- [ ] Set `SECRET_KEY` in production
-- [ ] Set `DEBUG = False` in production
-- [ ] Enable HTTPS
-- [ ] Configure allowed hosts
-- [ ] Use strong email credentials
-- [ ] Set up database backups
-- [ ] Monitor email delivery
-- [ ] Review user access logs
-
----
-
-## 🤝 Support
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| Port already in use | Kill process on that port (see Troubleshooting) |
-| Python/Node not found | Install from official websites |
-| Database error | Reset database and re-initialize |
-| Email not sending | Check `.env` configuration |
-| CORS error | Ensure both servers running |
-| React won't load | Check backend is running |
-
-### Resources
-
-- [Django Documentation](https://docs.djangoproject.com/)
-- [React Documentation](https://react.dev/)
-- [Django Email Guide](https://docs.djangoproject.com/en/5.2/topics/email/)
-- [Django Security](https://docs.djangoproject.com/en/5.2/topics/security/)
-
----
-
-## 📋 Commands Reference
-
-### Django
-```bash
-cd backend
-python manage.py runserver           # Start development server
-python manage.py shell               # Interactive Python shell
-python manage.py migrate             # Run database migrations
-python manage.py createsuperuser     # Create admin user
-python manage.py collectstatic       # Collect static files
-python manage.py test                # Run tests
-```
-
-### React
 ```bash
 cd backend/agora_frontend
-npm start                            # Development server
-npm run build                        # Production build
-npm install                          # Install dependencies
-npm test                             # Run tests
-```
-
-### Cleanup
-```bash
-bash START.sh clean                  # Clean all temp files
-rm backend/db.sqlite3                # Delete database
-rm -rf backend/agora_frontend/node_modules  # Delete npm deps
+npm install
+npm start
 ```
 
 ---
 
-## 📞 Contact & Support
+## 🌐 Local URLs
 
-For issues or questions:
-1. Check documentation files
-2. Review error messages in console
-3. Check application logs
-4. Consult Django/React documentation
-
----
-
-## 📝 Version Info
-
-- **Django:** 5.2.8
-- **Django REST Framework:** 3.16.1
-- **React:** 18.x
-- **Node:** 16.x+
-- **Python:** 3.8+
-- **Database:** SQLite (dev) / PostgreSQL (prod)
+| Component     | URL                                                              |
+| ------------- | ---------------------------------------------------------------- |
+| Frontend      | [http://localhost:3000](http://localhost:3000)                   |
+| Backend       | [http://localhost:8000](http://localhost:8000)                   |
+| Admin Panel   | [http://localhost:8000/admin](http://localhost:8000/admin)       |
+| A/B Test Page | [http://localhost:8000/1317cca/](http://localhost:8000/1317cca/) |
 
 ---
 
-## ✅ Quick Checklist
+# 🌍 **3. Deployment Information**
 
-- [x] Profile page implemented
-- [x] Email verification system
-- [x] Yale email validation
-- [x] Admin panel
-- [x] API endpoints
-- [x] React frontend
-- [x] Agora Sparks scoring
-- [x] Token-based verification
-- [x] HTML email templates
-- [x] Complete documentation
+## Platform: **Render**
+
+Render hosts both frontend and backend with auto-deploy from GitHub.
+
+### Deployment Targets
+
+| Layer            | URL                                                                                    |
+| ---------------- | -------------------------------------------------------------------------------------- |
+| Frontend (React) | [https://agora-frontend-16kz.onrender.com/](https://agora-frontend-16kz.onrender.com/) |
+| Backend (Django) | [https://agora-backend-vavf.onrender.com/](https://agora-backend-vavf.onrender.com/)   |
 
 ---
 
-**Ready to go!** 🎉
+## 🧪 Staging Environment
 
-Start the application with:
-```bash
-bash START.sh    # macOS/Linux
-START.bat        # Windows
+Same as production for this course project; automatically deployed on pushes to `main`.
+
+---
+
+## 🚀 Backend Deployment Steps (Render)
+
+1. Create Web Service → connect GitHub repo
+2. Set build command:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set start command:
+
+   ```bash
+   cd backend && gunicorn agora_backend.wsgi:application --bind 0.0.0.0:$PORT
+   ```
+4. Set environment variables:
+
+   ```
+   DEBUG=False
+   SECRET_KEY=xxx
+   ALLOWED_HOSTS=agora-backend-vavf.onrender.com
+   CORS_ALLOWED_ORIGINS=https://agora-frontend-16kz.onrender.com
+   ```
+
+---
+
+## 🎨 Frontend Deployment Steps (Render)
+
+1. New Static Site → connect repo
+2. Build command:
+
+   ```bash
+   cd backend/agora_frontend && npm install && npm run build
+   ```
+3. Publish directory:
+
+   ```
+   backend/agora_frontend/build
+   ```
+4. Environment variables:
+
+   ```
+   REACT_APP_API_URL=https://agora-backend-vavf.onrender.com
+   ```
+
+---
+
+# 🛠️ **4. Technology Stack**
+
+## Backend
+
+* Django 5
+* Django REST Framework
+* Python 3.9+
+* SQLite (dev) / PostgreSQL (deployment ready)
+* django-cors-headers
+* Gunicorn
+
+## Frontend
+
+* React 18
+* React Router
+* Axios
+* CSS
+
+## DevOps
+
+* Render
+* GitHub
+* START scripts for local setup
+
+---
+
+# 👥 **5. Team Member Contributions**
+
+## 🟢 **Yiru Li — Product Owner / Full-Stack Developer**
+
+**Contributions**
+
+* Built **post creation** with **image upload**
+* Implemented **comment functionality**
+* Built the **post feed UI** and ensured consistency across pages
+* Unified global UI styling and layout system
+* Developed backend profile views
+* Wrote full project documentation (this report, setup guides, scripts)
+
+**Deliverables**
+
+* Post & Comment models and Django views
+* Unified CSS / UI system
+* Documentation & setup scripts
+
+---
+
+## 🔵 **Ameesha Masand — Frontend Developer / UI Implementation**
+
+**Contributions**
+
+* Built **email input + registration UI**
+* Integrated registration UI with backend domain validation
+* Created styled form components and onboarding layout
+* **Implemented the A/B test UI**, including “kudos/thanks” button variation and page styling
+* Helped refine frontend styling across the app
+
+**Deliverables**
+
+* Registration components
+* Error-state and form styling
+* **A/B test UI implementation**
+
+---
+
+## 🟣 **Amber Tran — Backend Developer / Infrastructure**
+
+**Contributions**
+
+* Developed **registration + login backend**
+* Implemented `@yale.edu` email domain validation
+* Created database schema for user accounts
+* Built backend API endpoints
+* Configured Render deployments
+* Implemented **A/B test backend variant assignment**
+
+**Deliverables**
+
+* Authentication system
+* Domain check logic
+* Deployment configuration (`render.yaml`)
+* A/B test session logic
+
+---
+
+# 🔄 **6. A/B Test Endpoint Guide**
+
+## 🎯 Purpose
+
+Evaluate whether “kudos” or “thanks” yields more positive user interaction.
+
+---
+
+## 🔗 Endpoint URLs
+
+| Environment | URL                                                                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------ |
+| Local       | [http://localhost:8000/1317cca/](http://localhost:8000/1317cca/)                                       |
+| Render      | [https://agora-frontend-16kz.onrender.com/1317cca/](https://agora-frontend-16kz.onrender.com/1317cca/) |
+
+---
+
+## 🧠 How It Works
+
+1. On first visit, user receives variant **A** or **B** randomly.
+2. Variant stored in session (`request.session["ab_variant"]`).
+3. Ameesha’s frontend displays corresponding button text.
+4. Amber’s backend controls assignment logic.
+
+---
+
+## 🖥️ Backend Logic Example
+
+```python
+@csrf_exempt
+@require_http_methods(["GET"])
+def abtest_view(request):
+    if 'ab_variant' not in request.session:
+        request.session['ab_variant'] = random.choice(['A', 'B'])
+
+    variant = request.session['ab_variant']
+    button_text = 'kudos' if variant == 'A' else 'thanks'
+
+    context = {
+        'team_members': ['delightful-hamster', 'light-hedgehog', 'zealous-scorpion'],
+        'button_text': button_text,
+        'variant': variant
+    }
+    return render(request, 'abtest.html', context)
 ```
 
-Then visit: **http://localhost:3000**
-
 ---
 
-*Last Updated: 2025-11-12*
-*Agora - Yale Community Discussion Platform*
+# 📎 **Final Summary**
+
+Throughout three sprints, the team successfully delivered:
+
+* A functional posting + commenting system
+* Image upload capability
+* Registration UI with Yale email domain check
+* Unified frontend UI
+* A/B testing infrastructure
+* Full deployment to Render
+* Complete documentation
+
+Agora demonstrates the team's ability to execute a full-stack software project under agile methodology.
+
+
+# 🔗 **Project Links**
+
+1. **GitHub Repository:**
+   [https://github.com/amberstran/mgt656_final_project](https://github.com/amberstran/mgt656_final_project)
+
+2. **GitHub Project Board:**
+   [https://github.com/users/amberstran/projects/2](https://github.com/users/amberstran/projects/2)
+
+3. **Frontend (Render Deployment):**
+   [https://agora-frontend-16kz.onrender.com/](https://agora-frontend-16kz.onrender.com/)
+
+4. **Backend (Render Deployment):**
+   [https://agora-backend-vavf.onrender.com/](https://agora-backend-vavf.onrender.com/)
+
+5. **A/B Test Site:**
+   [https://agora-frontend-16kz.onrender.com/1317cca/](https://agora-frontend-16kz.onrender.com/1317cca/)
+
